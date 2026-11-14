@@ -1,13 +1,14 @@
 "use client";
 import { useState } from "react";
 import { sb } from "@/lib/supabase/client";
-import { sel } from "@/lib/ui";
+import { iconBtn, pill, sel } from "@/lib/ui";
 import Composer from "./Composer";
 import Header from "./Header";
+import Icon from "./Icon";
 import PostCard, { usePostBundle } from "./PostCard";
 import { useRefs } from "./Refs";
 
-// Fil de posts façon X/Threads : photos, @mentions, #hashtags, Markdown/code, citation, lien vers tâche/projet/affaire.
+// Fil de posts façon Threads : photos, @mentions, #hashtags, Markdown/code, citation, lien vers tâche/projet/affaire.
 export default function Posts() {
   const { name } = useRefs();
   const b = usePostBundle();
@@ -15,6 +16,7 @@ export default function Posts() {
   const [quote, setQuote] = useState<string | null>(null);
   const [lt, setLt] = useState<"" | "task" | "project" | "deal">("");
   const [lid, setLid] = useState("");
+  const [linkOpen, setLinkOpen] = useState(false);
 
   const roots = b.posts.filter((p) => !p.parent_id).reverse();
   const list = tag ? roots.filter((p) => p.body.toLowerCase().includes(`#${tag.toLowerCase()}`)) : roots;
@@ -24,31 +26,49 @@ export default function Posts() {
 
   async function send(body: string, images: string[], mentions: string[]) {
     await sb().from("posts").insert({ body, images, mentions, quote_id: quote, link_type: lt || null, link_id: lt && lid ? lid : null });
-    setQuote(null); setLt(""); setLid("");
+    setQuote(null); setLt(""); setLid(""); setLinkOpen(false);
   }
 
   const extra = (
-    <div className="space-y-2 text-sm">
-      {quoted && <div className="flex items-center justify-between rounded-lg bg-neutral-100 px-2 py-1 dark:bg-neutral-800"><span className="truncate">🔁 {name(quoted.author)} : {quoted.body}</span><button onClick={() => setQuote(null)}>✕</button></div>}
-      <div className="flex gap-2">
-        <select className={sel} value={lt} onChange={(e) => { setLt(e.target.value as typeof lt); setLid(""); }}>
-          <option value="">🔗 Lier…</option><option value="task">Une tâche</option><option value="project">Un projet</option><option value="deal">Une affaire</option>
-        </select>
-        {lt && <select className={`${sel} min-w-0 flex-1`} value={lid} onChange={(e) => setLid(e.target.value)}><option value="">Choisir…</option>{items.map(([id, l]) => <option key={id} value={id}>{l}</option>)}</select>}
-      </div>
+    <div className="mb-2 space-y-2 empty:hidden">
+      {quoted && (
+        <div className="flex items-center gap-2 rounded-[10px] border border-line px-3 py-2 text-[13px]">
+          <Icon name="repeat" size={15} className="text-muted" />
+          <span className="min-w-0 flex-1 truncate"><b className="font-medium">{name(quoted.author)}</b> <span className="text-muted">{quoted.body}</span></span>
+          <button aria-label="Retirer la citation" className="text-muted" onClick={() => setQuote(null)}><Icon name="x" size={15} /></button>
+        </div>
+      )}
+      {linkOpen && (
+        <div className="flex gap-2">
+          <select className={sel} value={lt} onChange={(e) => { setLt(e.target.value as typeof lt); setLid(""); }}>
+            <option value="">Lier à…</option><option value="task">Tâche</option><option value="project">Projet</option><option value="deal">Affaire</option>
+          </select>
+          {lt && <select className={`${sel} min-w-0 flex-1`} value={lid} onChange={(e) => setLid(e.target.value)}><option value="">Choisir…</option>{items.map(([id, l]) => <option key={id} value={id}>{l}</option>)}</select>}
+        </div>
+      )}
     </div>
   );
 
   return (
     <div className="flex h-full flex-col">
-      <Header title="Posts">{tag && <button className="text-sm text-indigo-600" onClick={() => setTag(null)}>#{tag} ✕</button>}</Header>
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto">
-        <div className="border-b border-neutral-200 dark:border-neutral-800"><Composer images placeholder="Quoi de neuf ? (@mention, #tag, Markdown)" onSend={send} extra={extra} /></div>
-        {tags.length > 0 && !tag && <div className="flex gap-2 overflow-x-auto px-3">{tags.map(([t, n]) => <button key={t} onClick={() => setTag(t)} className="shrink-0 rounded-full bg-neutral-100 px-3 py-1 text-sm dark:bg-neutral-800">#{t} <span className="text-neutral-400">{n}</span></button>)}</div>}
-        <div className="space-y-3 px-3 pb-4">
-          {list.map((p) => <PostCard key={p.id} p={p} b={b} onTag={setTag} onQuote={setQuote} />)}
-          {!list.length && <p className="pt-10 text-center text-neutral-500">Aucun post.</p>}
+      <Header title={tag ? `#${tag}` : "Posts"}>
+        {tag
+          ? <button className={iconBtn} aria-label="Retirer le filtre" onClick={() => setTag(null)}><Icon name="x" size={20} /></button>
+          : <button className={`${iconBtn} ${linkOpen || lt ? "bg-black/[.05]" : ""}`} aria-label="Lier à un élément" onClick={() => setLinkOpen(!linkOpen)}><Icon name="link" size={19} /></button>}
+      </Header>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="border-b border-line bg-surface">
+          <Composer flat images placeholder="Quoi de neuf ?" onSend={send} extra={extra} />
         </div>
+        {tags.length > 0 && !tag && (
+          <div className="scroll-x flex gap-1.5 overflow-x-auto border-b border-line px-4 py-2.5">
+            {tags.map(([t, n]) => <button key={t} onClick={() => setTag(t)} className={pill(false)}><span className="text-muted">#</span>{t}<span className="ml-1.5 text-muted">{n}</span></button>)}
+          </div>
+        )}
+        <div className="divide-y divide-line">
+          {list.map((p) => <PostCard key={p.id} p={p} b={b} onTag={setTag} onQuote={setQuote} />)}
+        </div>
+        {!list.length && <p className="py-20 text-center text-[13px] text-muted">Aucun post pour l&apos;instant.</p>}
       </div>
     </div>
   );

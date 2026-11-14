@@ -19,13 +19,18 @@ export default function Login() {
   }
 
   return (
-    <form onSubmit={submit} className="mx-auto flex h-dvh max-w-sm flex-col justify-center gap-3 px-6">
-      <h1 className="text-2xl font-bold">Rylix Hub</h1>
-      <p className="text-sm text-neutral-500">Espace privé de l&apos;équipe.</p>
-      <input className={input} autoCapitalize="none" autoCorrect="off" autoComplete="username" placeholder="nom d'utilisateur" value={username} onChange={(e) => setUsername(e.target.value)} />
-      <input className={input} type="password" inputMode="numeric" autoComplete="current-password" placeholder="code" value={password} onChange={(e) => setPassword(e.target.value)} />
-      <button className={btn} disabled={!username || !password}>Se connecter</button>
-      {err && <p className="text-sm text-red-600">{err}</p>}
+    <form onSubmit={submit} className="mx-auto flex h-dvh max-w-sm flex-col justify-center px-6 pb-[env(safe-area-inset-bottom)]">
+      <div className="mb-8">
+        <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-[12px] bg-accent text-[18px] font-semibold text-white">R</div>
+        <h1 className="text-[26px] font-semibold tracking-[-0.03em]">Rylix Hub</h1>
+        <p className="mt-1 text-[14px] text-muted">Espace privé de l&apos;équipe.</p>
+      </div>
+      <div className="space-y-2.5">
+        <input className={input} autoCapitalize="none" autoCorrect="off" autoComplete="username" placeholder="Nom d'utilisateur" value={username} onChange={(e) => setUsername(e.target.value)} />
+        <input className={input} type="password" inputMode="numeric" autoComplete="current-password" placeholder="Code" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button className={`${btn} w-full`} disabled={!username || !password}>Se connecter</button>
+      </div>
+      <p className="mt-3 h-5 text-[13px] text-[#d93636]">{err}</p>
     </form>
   );
 }

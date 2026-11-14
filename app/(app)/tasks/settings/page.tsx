@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import Header from "@/components/Header";
+import Icon from "@/components/Icon";
 import { useRefs } from "@/components/Refs";
 import { sb } from "@/lib/supabase/client";
-import { btn, card, input, sel } from "@/lib/ui";
+import { btn, input, section, sel } from "@/lib/ui";
 import type { FieldDef, Status } from "@/lib/types";
 
 const KINDS = [["todo", "À faire"], ["active", "En cours"], ["done", "Terminé"]] as const;
@@ -28,46 +29,46 @@ export default function TaskSettings() {
   return (
     <div className="flex h-full flex-col">
       <Header title="Personnaliser les tâches" back="/tasks" />
-      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-4">
+      <div className="min-h-0 flex-1 space-y-7 overflow-y-auto px-4 pb-8 pt-4">
         <section className="space-y-2">
-          <h2 className="font-semibold">Statuts</h2>
-          <p className="text-xs text-neutral-500">Le type décide du comportement : « Terminé » compte dans l&apos;avancement des projets.</p>
+          <h2 className={section}>Statuts</h2>
+          <p className="text-[12.5px] leading-snug text-muted">Le type décide du comportement : « Terminé » compte dans l&apos;avancement des projets.</p>
           {statuses.map((s: Status, i) => (
-            <div key={s.id} className={`${card} flex items-center gap-2`}>
-              <input type="color" className="h-8 w-8 shrink-0 rounded" value={s.color} onChange={(e) => sb().from("statuses").update({ color: e.target.value }).eq("id", s.id).then(() => {})} />
-              <input key={s.name} className={`${input} !py-1`} defaultValue={s.name} onBlur={(e) => e.target.value.trim() && e.target.value !== s.name && run(sb().from("statuses").update({ name: e.target.value.trim() }).eq("id", s.id))} />
+            <div key={s.id} className="flex items-center gap-1.5 rounded-xl border border-line bg-surface py-1.5 pl-2.5 pr-1">
+              <input type="color" className="h-7 w-7 shrink-0 cursor-pointer rounded-md border border-line bg-transparent p-0" value={s.color} onChange={(e) => sb().from("statuses").update({ color: e.target.value }).eq("id", s.id).then(() => {})} />
+              <input key={s.name} className="h-9 min-w-0 flex-1 bg-transparent px-1 text-[15px] outline-none" defaultValue={s.name} onBlur={(e) => e.target.value.trim() && e.target.value !== s.name && run(sb().from("statuses").update({ name: e.target.value.trim() }).eq("id", s.id))} />
               <select className={sel} value={s.kind} onChange={(e) => run(sb().from("statuses").update({ kind: e.target.value }).eq("id", s.id))}>{KINDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-              <button disabled={i === 0} onClick={() => swap("statuses", s, statuses[i - 1])}>↑</button>
-              <button disabled={i === statuses.length - 1} onClick={() => swap("statuses", s, statuses[i + 1])}>↓</button>
-              <button onClick={() => run(sb().from("statuses").delete().eq("id", s.id))}>🗑</button>
+              <button aria-label="Monter" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === 0} onClick={() => swap("statuses", s, statuses[i - 1])}>↑</button>
+              <button aria-label="Descendre" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === statuses.length - 1} onClick={() => swap("statuses", s, statuses[i + 1])}>↓</button>
+              <button onClick={() => run(sb().from("statuses").delete().eq("id", s.id))} aria-label="Supprimer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted"><Icon name="trash" size={16} /></button>
             </div>
           ))}
-          <div className="flex gap-2"><input className={input} placeholder="Nouveau statut" value={sName} onChange={(e) => setSName(e.target.value)} /><button className={btn} disabled={!sName.trim()} onClick={async () => { await run(sb().from("statuses").insert({ name: sName.trim(), kind: "active", position: next(statuses) })); setSName(""); }}>＋</button></div>
+          <div className="flex gap-2"><input className={input} placeholder="Nouveau statut" value={sName} onChange={(e) => setSName(e.target.value)} /><button className={`${btn} w-11 !px-0`} disabled={!sName.trim()} onClick={async () => { await run(sb().from("statuses").insert({ name: sName.trim(), kind: "active", position: next(statuses) })); setSName(""); }} aria-label="Ajouter"><Icon name="plus" size={20} stroke={2.2} /></button></div>
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-semibold">Étiquettes</h2>
+          <h2 className={section}>Étiquettes</h2>
           {labels.map((l) => (
-            <div key={l.id} className={`${card} flex items-center gap-2`}>
-              <input type="color" className="h-8 w-8 shrink-0 rounded" value={l.color} onChange={(e) => sb().from("labels").update({ color: e.target.value }).eq("id", l.id).then(() => {})} />
-              <input key={l.name} className={`${input} !py-1`} defaultValue={l.name} onBlur={(e) => e.target.value.trim() && e.target.value !== l.name && run(sb().from("labels").update({ name: e.target.value.trim() }).eq("id", l.id))} />
-              <button onClick={() => run(sb().from("labels").delete().eq("id", l.id))}>🗑</button>
+            <div key={l.id} className="flex items-center gap-1.5 rounded-xl border border-line bg-surface py-1.5 pl-2.5 pr-1">
+              <input type="color" className="h-7 w-7 shrink-0 cursor-pointer rounded-md border border-line bg-transparent p-0" value={l.color} onChange={(e) => sb().from("labels").update({ color: e.target.value }).eq("id", l.id).then(() => {})} />
+              <input key={l.name} className="h-9 min-w-0 flex-1 bg-transparent px-1 text-[15px] outline-none" defaultValue={l.name} onBlur={(e) => e.target.value.trim() && e.target.value !== l.name && run(sb().from("labels").update({ name: e.target.value.trim() }).eq("id", l.id))} />
+              <button onClick={() => run(sb().from("labels").delete().eq("id", l.id))} aria-label="Supprimer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted"><Icon name="trash" size={16} /></button>
             </div>
           ))}
-          <div className="flex gap-2"><input className={input} placeholder="Nouvelle étiquette" value={lName} onChange={(e) => setLName(e.target.value)} /><button className={btn} disabled={!lName.trim()} onClick={async () => { await run(sb().from("labels").insert({ name: lName.trim().toLowerCase() })); setLName(""); }}>＋</button></div>
+          <div className="flex gap-2"><input className={input} placeholder="Nouvelle étiquette" value={lName} onChange={(e) => setLName(e.target.value)} /><button className={`${btn} w-11 !px-0`} disabled={!lName.trim()} onClick={async () => { await run(sb().from("labels").insert({ name: lName.trim().toLowerCase() })); setLName(""); }} aria-label="Ajouter"><Icon name="plus" size={20} stroke={2.2} /></button></div>
         </section>
 
         <section className="space-y-2">
-          <h2 className="font-semibold">Champs personnalisés</h2>
-          <p className="text-xs text-neutral-500">Apparaissent sur chaque tâche (estimation, environnement, version, lien PR…).</p>
+          <h2 className={section}>Champs personnalisés</h2>
+          <p className="text-[12.5px] leading-snug text-muted">Apparaissent sur chaque tâche (estimation, environnement, version, lien PR…).</p>
           {fieldDefs.map((f, i) => (
-            <div key={f.id} className={`${card} space-y-2`}>
+            <div key={f.id} className="space-y-2 rounded-xl border border-line bg-surface p-2.5">
               <div className="flex items-center gap-2">
                 <input key={f.name} className={`${input} !py-1`} defaultValue={f.name} onBlur={(e) => e.target.value.trim() && e.target.value !== f.name && run(sb().from("field_defs").update({ name: e.target.value.trim() }).eq("id", f.id))} />
-                <span className="rounded bg-neutral-100 px-2 py-1 text-xs dark:bg-neutral-800">{TYPES.find(([k]) => k === f.type)?.[1]}</span>
-                <button disabled={i === 0} onClick={() => swap("field_defs", f, fieldDefs[i - 1])}>↑</button>
-                <button disabled={i === fieldDefs.length - 1} onClick={() => swap("field_defs", f, fieldDefs[i + 1])}>↓</button>
-                <button onClick={() => confirm("Supprimer ce champ ? Les valeurs restent masquées.") && run(sb().from("field_defs").delete().eq("id", f.id))}>🗑</button>
+                <span className="rounded-md border border-line px-1.5 py-0.5 text-[11.5px] text-muted">{TYPES.find(([k]) => k === f.type)?.[1]}</span>
+                <button aria-label="Monter" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === 0} onClick={() => swap("field_defs", f, fieldDefs[i - 1])}>↑</button>
+                <button aria-label="Descendre" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === fieldDefs.length - 1} onClick={() => swap("field_defs", f, fieldDefs[i + 1])}>↓</button>
+                <button onClick={() => confirm("Supprimer ce champ ? Les valeurs restent masquées.") && run(sb().from("field_defs").delete().eq("id", f.id))} aria-label="Supprimer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted"><Icon name="trash" size={16} /></button>
               </div>
               {f.type === "select" && <input key={f.options.join()} className={`${input} !py-1`} placeholder="Options séparées par des virgules" defaultValue={f.options.join(", ")} onBlur={(e) => run(sb().from("field_defs").update({ options: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) }).eq("id", f.id))} />}
             </div>
@@ -75,7 +76,7 @@ export default function TaskSettings() {
           <div className="flex gap-2">
             <input className={input} placeholder="Nouveau champ" value={fName} onChange={(e) => setFName(e.target.value)} />
             <select className={sel} value={fType} onChange={(e) => setFType(e.target.value as FieldDef["type"])}>{TYPES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
-            <button className={btn} disabled={!fName.trim()} onClick={async () => { await run(sb().from("field_defs").insert({ name: fName.trim(), type: fType, position: next(fieldDefs) })); setFName(""); }}>＋</button>
+            <button className={`${btn} w-11 !px-0`} disabled={!fName.trim()} onClick={async () => { await run(sb().from("field_defs").insert({ name: fName.trim(), type: fType, position: next(fieldDefs) })); setFName(""); }} aria-label="Ajouter"><Icon name="plus" size={20} stroke={2.2} /></button>
           </div>
         </section>
       </div>

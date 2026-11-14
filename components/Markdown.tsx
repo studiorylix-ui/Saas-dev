@@ -8,14 +8,14 @@ const pre = (b: string) =>
 
 export default function Markdown({ text, onTag }: { text: string; onTag?: (t: string) => void }) {
   return (
-    <div className="md text-[15px]">
+    <div className="md text-[15px] text-ink">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         urlTransform={(u) => (/^(https?:|mailto:|mention:|tag:)/i.test(u) ? u : "")}
         components={{
           a: ({ href, children }) =>
-            href?.startsWith("mention:") ? <span className="font-medium text-indigo-600">{children}</span>
-            : href?.startsWith("tag:") ? <button type="button" className="font-medium text-indigo-600" onClick={() => onTag?.(href.slice(4))}>{children}</button>
+            href?.startsWith("mention:") ? <span className="font-medium text-ink">{children}</span>
+            : href?.startsWith("tag:") ? <button type="button" className="font-medium text-ink underline decoration-line underline-offset-2" onClick={() => onTag?.(href.slice(4))}>{children}</button>
             : <a href={href} target="_blank" rel="noopener noreferrer">{children}</a>,
         }}
       >

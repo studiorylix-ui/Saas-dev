@@ -4,6 +4,8 @@ import { sb } from "@/lib/supabase/client";
 import { useTable } from "@/lib/useTable";
 import { ago } from "@/lib/ui";
 import type { Deal, Post, PostLike, Project, Task } from "@/lib/types";
+import Avatar from "./Avatar";
+import Icon, { type IconName } from "./Icon";
 import Markdown from "./Markdown";
 import { useRefs } from "./Refs";
 
@@ -23,11 +25,26 @@ function LinkCard({ p, b }: { p: Post; b: Bundle }) {
   const t = p.link_type === "task" ? b.tasks.find((x) => x.id === p.link_id) : null;
   const pr = p.link_type === "project" ? b.projects.find((x) => x.id === p.link_id) : null;
   const d = p.link_type === "deal" ? b.deals.find((x) => x.id === p.link_id) : null;
-  const x = t ? { href: `/tasks/${t.id}`, icon: "✅", label: `RYL-${t.num} · ${t.title}` } : pr ? { href: `/projects/${pr.id}`, icon: "📊", label: pr.name } : d ? { href: `/deals/${d.id}`, icon: "💼", label: d.name } : null;
+  const x = t ? { href: `/tasks/${t.id}`, kind: `Tâche · RYL-${t.num}`, label: t.title, icon: "check" as IconName }
+    : pr ? { href: `/projects/${pr.id}`, kind: "Projet", label: pr.name, icon: "folder" as IconName }
+    : d ? { href: `/deals/${d.id}`, kind: "Affaire", label: d.name, icon: "link" as IconName } : null;
   if (!x) return null;
-  return <Link href={x.href} className="mt-2 flex items-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-3 py-2 text-sm text-indigo-800 dark:border-indigo-900 dark:bg-indigo-950 dark:text-indigo-200">{x.icon} {x.label}</Link>;
+  return (
+    <Link href={x.href} className="mt-2.5 flex items-center gap-3 rounded-[10px] border border-line bg-surface px-3 py-2.5 transition-colors duration-150 active:bg-subtle">
+      <Icon name={x.icon} size={18} className="text-muted" />
+      <div className="min-w-0 flex-1"><div className="text-[11.5px] text-muted">{x.kind}</div><div className="truncate text-[14px] font-medium">{x.label}</div></div>
+      <Icon name="chevron" size={16} className="text-muted" />
+    </Link>
+  );
 }
 
+const Action = ({ icon, n, on, onClick, href, label }: { icon: IconName; n?: number; on?: boolean; onClick?: () => void; href?: string; label: string }) => {
+  const cls = `-ml-2 inline-flex h-9 min-w-11 items-center gap-1.5 rounded-lg px-2 text-[13px] transition-colors duration-150 active:bg-black/[.05] ${on ? "text-ink" : "text-muted"}`;
+  const inner = <><Icon name={icon} size={18} filled={on && icon === "heart"} />{!!n && <span className="tabular-nums">{n}</span>}</>;
+  return href ? <Link href={href} aria-label={label} className={cls}>{inner}</Link> : <button aria-label={label} onClick={onClick} className={cls}>{inner}</button>;
+};
+
+// Post façon Threads : avatar, texte Markdown, photos, citation, élément lié, actions.
 export default function PostCard({ p, b, onTag, onQuote }: { p: Post; b: Bundle; onTag?: (t: string) => void; onQuote?: (id: string) => void }) {
   const { me, name } = useRefs();
   const replies = b.posts.filter((r) => r.parent_id === p.id).length;
@@ -44,29 +61,37 @@ export default function PostCard({ p, b, onTag, onQuote }: { p: Post; b: Bundle;
   }
 
   return (
-    <article className="rounded-2xl border border-neutral-200 bg-white p-3 dark:border-neutral-800 dark:bg-neutral-900">
-      <div className="flex items-center gap-2 text-sm">
-        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-bold text-white">{name(p.author).slice(0, 2).toUpperCase()}</span>
-        <div><b>{name(p.author)}</b> <span className="text-xs text-neutral-500">· {ago(p.created_at)}</span></div>
-        {p.author === me && <button className="ml-auto text-neutral-400" onClick={del}>🗑</button>}
-      </div>
-      {p.body && <div className="mt-2"><Markdown text={p.body} onTag={onTag} /></div>}
-      {p.images.length > 0 && (
-        <div className={`mt-2 grid gap-1 ${p.images.length > 1 ? "grid-cols-2" : ""}`}>
-          {p.images.map((u) => (
-            <a key={u} href={u} target="_blank" rel="noopener noreferrer">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={u} alt="" className={`w-full rounded-xl object-cover ${p.images.length > 1 ? "aspect-square" : "max-h-96"}`} />
-            </a>
-          ))}
+    <article className="flex gap-3 px-4 py-3.5">
+      <Avatar name={name(p.author)} size={36} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="text-[14.5px] font-semibold">{name(p.author)}</span>
+          <span className="text-[13px] text-muted">{ago(p.created_at)}</span>
+          {p.author === me && <button aria-label="Supprimer" className="-mr-2 ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted/70 active:bg-black/[.05]" onClick={del}><Icon name="trash" size={15} /></button>}
         </div>
-      )}
-      {quoted && <div className="mt-2 rounded-xl border border-neutral-200 p-2 text-sm dark:border-neutral-700"><b>{name(quoted.author)}</b><p className="line-clamp-3 text-neutral-600 dark:text-neutral-400">{quoted.body}</p></div>}
-      <LinkCard p={p} b={b} />
-      <div className="mt-2 flex gap-5 text-sm text-neutral-500">
-        <Link href={`/posts/${p.id}`}>💬 {replies || ""}</Link>
-        <button onClick={like} className={liked ? "text-rose-600" : ""}>{liked ? "♥" : "♡"} {likes.length || ""}</button>
-        {onQuote && <button onClick={() => onQuote(p.id)}>🔁 Citer</button>}
+        {p.body && <div className="mt-0.5"><Markdown text={p.body} onTag={onTag} /></div>}
+        {p.images.length > 0 && (
+          <div className={`mt-2.5 grid gap-1.5 ${p.images.length > 1 ? "grid-cols-2" : ""}`}>
+            {p.images.map((u) => (
+              <a key={u} href={u} target="_blank" rel="noopener noreferrer">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={u} alt="" loading="lazy" className={`w-full rounded-[10px] border border-line bg-subtle object-cover ${p.images.length > 1 ? "aspect-square" : "max-h-[420px]"}`} />
+              </a>
+            ))}
+          </div>
+        )}
+        {quoted && (
+          <div className="mt-2.5 rounded-[10px] border border-line bg-surface px-3 py-2.5">
+            <div className="flex items-center gap-2 text-[13px]"><Avatar name={name(quoted.author)} size={18} /><span className="font-medium">{name(quoted.author)}</span><span className="text-muted">{ago(quoted.created_at)}</span></div>
+            <p className="mt-1 line-clamp-3 text-[14px] text-ink/80">{quoted.body}</p>
+          </div>
+        )}
+        <LinkCard p={p} b={b} />
+        <div className="mt-1.5 flex gap-3">
+          <Action icon="heart" n={likes.length} on={liked} onClick={like} label="J'aime" />
+          <Action icon="chat" n={replies} href={`/posts/${p.id}`} label="Répondre" />
+          {onQuote && <Action icon="repeat" onClick={() => onQuote(p.id)} label="Citer" />}
+        </div>
       </div>
     </article>
   );

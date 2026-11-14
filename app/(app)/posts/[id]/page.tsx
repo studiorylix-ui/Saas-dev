@@ -12,10 +12,11 @@ export default function Thread() {
   const replies = b.posts.filter((x) => x.parent_id === id);
   return (
     <div className="flex h-full flex-col">
-      <Header title="Post" back="/posts" />
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3">
-        {p ? <PostCard p={p} b={b} /> : <p className="text-neutral-500">Chargement…</p>}
-        <div className="ml-4 space-y-3 border-l-2 border-indigo-200 pl-3">{replies.map((r) => <PostCard key={r.id} p={r} b={b} />)}</div>
+      <Header title="Fil" back="/posts" />
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {p ? <div className="border-b border-line bg-surface"><PostCard p={p} b={b} /></div> : <p className="p-4 text-[13px] text-muted">Chargement…</p>}
+        {replies.length > 0 && <div className="px-4 pb-1 pt-3 text-[12px] font-medium uppercase tracking-[.06em] text-muted">{replies.length} réponse{replies.length > 1 ? "s" : ""}</div>}
+        <div className="divide-y divide-line">{replies.map((r) => <PostCard key={r.id} p={r} b={b} />)}</div>
       </div>
       <Composer images placeholder="Répondre…" onSend={async (body, images, mentions) => { await sb().from("posts").insert({ body, images, mentions, parent_id: id }); }} />
     </div>

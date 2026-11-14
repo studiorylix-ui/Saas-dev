@@ -1,12 +1,16 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
+import Avatar from "@/components/Avatar";
 import Header from "@/components/Header";
+import Icon from "@/components/Icon";
 import { useRefs } from "@/components/Refs";
 import { sb } from "@/lib/supabase/client";
 import { useTable } from "@/lib/useTable";
-import { STAGES, STAGE_PROB, btn, card, day, eur, input, overdue } from "@/lib/ui";
+import { STAGES, STAGE_PROB, btn, day, eur, input, overdue, seg, segItem } from "@/lib/ui";
 import type { Deal, Project, Task } from "@/lib/types";
+
+const STATUS_DOT: Record<string, string> = { idée: "#b5b5b5", "en cours": "#d08a1c", "en pause": "#8a8a8a", terminé: "#1f9d55" };
 
 export default function Projects() {
   const { statuses, name } = useRefs();
@@ -27,52 +31,63 @@ export default function Projects() {
     setTitle("");
   }
   const open = deals.filter((d) => d.stage !== "gagnée" && d.stage !== "perdue");
-  const pipeline = open.reduce((s, d) => s + (d.amount ?? 0), 0);
-  const weighted = open.reduce((s, d) => s + (d.amount ?? 0) * STAGE_PROB[d.stage], 0);
-  const won = deals.filter((d) => d.stage === "gagnée").reduce((s, d) => s + (d.amount ?? 0), 0);
+  const kpis: [string, number][] = [["Pipeline", open.reduce((s, d) => s + (d.amount ?? 0), 0)], ["Pondéré", open.reduce((s, d) => s + (d.amount ?? 0) * STAGE_PROB[d.stage], 0)], ["Gagné", deals.filter((d) => d.stage === "gagnée").reduce((s, d) => s + (d.amount ?? 0), 0)]];
 
   return (
     <div className="flex h-full flex-col">
-      <Header title={tab === "projects" ? "Projets" : "Affaires"}>
-        <div className="flex rounded-lg bg-neutral-100 p-0.5 text-sm dark:bg-neutral-800">
-          {(["projects", "deals"] as const).map((t) => <button key={t} onClick={() => setTab(t)} className={`rounded-md px-3 py-1 ${tab === t ? "bg-white shadow dark:bg-neutral-700" : ""}`}>{t === "projects" ? "Projets" : "Affaires"}</button>)}
-        </div>
-      </Header>
-      <div className="min-h-0 flex-1 overflow-y-auto p-3">
-        {tab === "projects" ? (
-          <div className="space-y-2">
+      <Header title={tab === "projects" ? "Projets" : "Affaires"} />
+      <div className="shrink-0 border-b border-line px-4 py-2.5">
+        <div className={seg}>{(["projects", "deals"] as const).map((t) => <button key={t} onClick={() => setTab(t)} className={segItem(tab === t)}>{t === "projects" ? "Projets" : "Affaires"}</button>)}</div>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {tab === "projects" ? (!projects.length ? <p className="py-20 text-center text-[13px] text-muted">Aucun projet. Chaque projet crée aussi son canal de discussion.</p> :
+          <div className="divide-y divide-line border-b border-line">
             {projects.map((p) => {
               const t = tasks.filter((x) => x.project_id === p.id && !x.parent_id);
               const done = t.filter(isDone).length;
               const pct = t.length ? Math.round((done / t.length) * 100) : 0;
               return (
-                <Link key={p.id} href={`/projects/${p.id}`} className={`${card} block`}>
-                  <div className="flex items-center justify-between gap-2"><b>{p.name}</b><span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs dark:bg-neutral-800">{p.status}</span></div>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-neutral-200 dark:bg-neutral-800"><div className="h-full bg-indigo-600" style={{ width: `${pct}%` }} /></div>
-                  <div className="mt-1 flex justify-between text-xs text-neutral-500"><span>{done}/{t.length} tâches · {pct}%</span><span className={overdue(p.due_date) && p.status !== "terminé" ? "text-red-600" : ""}>{p.lead ? `@${name(p.lead)} ` : ""}{p.due_date ? `📅 ${day(p.due_date)}` : ""}</span></div>
+                <Link key={p.id} href={`/projects/${p.id}`} className="block bg-surface px-4 py-3.5 transition-colors duration-150 active:bg-subtle">
+                  <div className="flex items-center gap-2">
+                    <span className="min-w-0 flex-1 truncate text-[15px] font-medium">{p.name}</span>
+                    {p.lead && <Avatar name={name(p.lead)} size={22} />}
+                    <Icon name="chevron" size={16} className="text-muted/60" />
+                  </div>
+                  <div className="mt-2.5 flex items-center gap-3">
+                    <div className="h-1 flex-1 overflow-hidden rounded-full bg-line"><div className="h-full rounded-full bg-ink transition-[width] duration-200 ease-out" style={{ width: `${pct}%` }} /></div>
+                    <span className="w-9 text-right text-[12px] tabular-nums text-muted">{pct}%</span>
+                  </div>
+                  <div className="mt-2 flex items-center gap-3 text-[12px] text-muted">
+                    <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: STATUS_DOT[p.status] }} />{p.status}</span>
+                    <span>{done}/{t.length} tâches</span>
+                    {p.due_date && <span className={`inline-flex items-center gap-1 ${overdue(p.due_date) && p.status !== "terminé" ? "text-[#d93636]" : ""}`}><Icon name="calendar" size={12} />{day(p.due_date)}</span>}
+                  </div>
                 </Link>
               );
             })}
-            {!projects.length && <p className="pt-10 text-center text-neutral-500">Aucun projet.</p>}
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="grid grid-cols-3 gap-2 text-center">
-              {[["Pipeline", pipeline], ["Pondéré", weighted], ["Gagné", won]].map(([l, v]) => <div key={l as string} className={card}><div className="text-xs text-neutral-500">{l}</div><div className="font-semibold">{eur(v as number)}</div></div>)}
+          <div className="pb-4">
+            <div className="grid grid-cols-3 divide-x divide-line border-b border-line bg-surface">
+              {kpis.map(([l, v]) => <div key={l} className="px-4 py-3"><div className="text-[11.5px] text-muted">{l}</div><div className="mt-0.5 text-[15px] font-semibold tabular-nums tracking-tight">{eur(v)}</div></div>)}
             </div>
-            <div className="-mx-3 flex gap-3 overflow-x-auto px-3 pb-2">
+            <div className="scroll-x flex snap-x gap-3 overflow-x-auto px-4 pt-3">
               {STAGES.map((s) => {
                 const col = deals.filter((d) => d.stage === s);
                 return (
-                  <div key={s} className="w-64 shrink-0 space-y-2">
-                    <h2 className="px-1 text-sm font-semibold capitalize">{s} <span className="text-neutral-400">{col.length} · {eur(col.reduce((a, d) => a + (d.amount ?? 0), 0))}</span></h2>
-                    {col.map((d) => (
-                      <Link key={d.id} href={`/deals/${d.id}`} className={`${card} block`}>
-                        <b>{d.name}</b><div className="text-xs text-neutral-500">{d.client}</div>
-                        {d.amount != null && <div className="mt-1 text-sm">{eur(d.amount)}</div>}
-                        {d.next_action && <div className={`mt-1 text-xs ${overdue(d.next_action_date) ? "text-red-600" : "text-neutral-500"}`}>→ {d.next_action} {d.next_action_date && `(${day(d.next_action_date)})`}</div>}
-                      </Link>
-                    ))}
+                  <div key={s} className="w-[72vw] max-w-[280px] shrink-0 snap-start">
+                    <h2 className="mb-2 flex items-baseline gap-2 text-[13px] font-medium capitalize">{s}<span className="font-normal normal-case text-muted">{col.length} · {eur(col.reduce((a, d) => a + (d.amount ?? 0), 0))}</span></h2>
+                    <div className="space-y-2">
+                      {col.map((d) => (
+                        <Link key={d.id} href={`/deals/${d.id}`} className="block rounded-xl border border-line bg-surface p-3 transition-colors duration-150 active:bg-subtle">
+                          <div className="flex items-start justify-between gap-2"><span className="text-[14.5px] font-medium">{d.name}</span>{d.amount != null && <span className="text-[13px] tabular-nums">{eur(d.amount)}</span>}</div>
+                          {d.client && <div className="text-[12.5px] text-muted">{d.client}</div>}
+                          {d.next_action && <div className={`mt-2 border-t border-line pt-2 text-[12px] ${overdue(d.next_action_date) ? "text-[#d93636]" : "text-muted"}`}>{d.next_action}{d.next_action_date && ` · ${day(d.next_action_date)}`}</div>}
+                        </Link>
+                      ))}
+                      {!col.length && <div className="rounded-xl border border-dashed border-line py-6 text-center text-[12px] text-muted">Vide</div>}
+                    </div>
                   </div>
                 );
               })}
@@ -80,9 +95,10 @@ export default function Projects() {
           </div>
         )}
       </div>
-      <div className="flex gap-2 border-t border-neutral-200 p-2 dark:border-neutral-800">
-        <input className={input} placeholder={tab === "projects" ? "Nouveau projet (crée aussi son canal)" : "Nouvelle affaire"} value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
-        <button className={btn} onClick={add} disabled={!title.trim()}>＋</button>
+
+      <div className="flex shrink-0 gap-2 border-t border-line bg-surface px-3 py-2">
+        <input className={input} placeholder={tab === "projects" ? "Nouveau projet" : "Nouvelle affaire"} value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
+        <button className={`${btn} w-11 !px-0`} aria-label="Ajouter" onClick={add} disabled={!title.trim()}><Icon name="plus" size={20} stroke={2.2} /></button>
       </div>
     </div>
   );
