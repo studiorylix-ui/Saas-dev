@@ -13,7 +13,7 @@ export default function ActivityFeed({ id }: { id: string }) {
   return (
     <ul className="relative space-y-3 border-l border-line pl-4 text-[13px]">
       {mine.map((a) => (
-        <li key={a.id} className="relative leading-snug text-muted"><span className="absolute -left-[19.5px] top-[5px] h-[7px] w-[7px] rounded-full border border-line bg-surface" />
+        <li key={a.id} className="relative leading-snug text-muted"><span className="absolute -left-[19.5px] top-[5px] h-[7px] w-[7px] rounded-full bg-surface shadow-card" />
           <span className="font-medium text-ink">{name(a.actor)}</span> {describe(a, { profiles, statuses, labels }).join(" · ")} <span className="text-muted/70">· {ago(a.created_at)}</span>
         </li>
       ))}

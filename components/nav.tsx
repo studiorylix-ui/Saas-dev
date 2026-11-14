@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext } from "react";
 
-export type ScreenKind = "task" | "project" | "deal" | "post" | "search" | "activity" | "settings" | "note";
+export type ScreenKind = "task" | "project" | "deal" | "post" | "search" | "activity" | "settings" | "note" | "account";
 export type Screen = { k: ScreenKind; id?: string };
 
 export const encStack = (s: Screen[]) => s.map((x) => (x.id ? `${x.k}.${x.id}` : x.k)).join("~");

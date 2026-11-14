@@ -33,8 +33,8 @@ export default function SettingsScreen() {
           <h2 className={section}>Statuts</h2>
           <p className="text-[12.5px] leading-snug text-muted">Le type décide du comportement : « Terminé » compte dans l&apos;avancement des projets.</p>
           {statuses.map((s: Status, i) => (
-            <div key={s.id} className="flex items-center gap-1.5 rounded-xl border border-line bg-surface py-1.5 pl-2.5 pr-1">
-              <input type="color" className="h-7 w-7 shrink-0 cursor-pointer rounded-md border border-line bg-transparent p-0" value={s.color} onChange={(e) => db.update("statuses", s.id, { color: e.target.value })} />
+            <div key={s.id} className="flex items-center gap-1.5 group-card py-1.5 pl-2.5 pr-1">
+              <input type="color" className="h-7 w-7 shrink-0 cursor-pointer rounded-full border-0 bg-transparent p-0" value={s.color} onChange={(e) => db.update("statuses", s.id, { color: e.target.value })} />
               <input key={s.name} className="h-9 min-w-0 flex-1 bg-transparent px-1 text-[15px] outline-none" defaultValue={s.name} onBlur={(e) => e.target.value.trim() && e.target.value !== s.name && db.update("statuses", s.id, { name: e.target.value.trim() })} />
               <select className={sel} value={s.kind} onChange={(e) => db.update("statuses", s.id, { kind: e.target.value })}>{KINDS.map(([k, l]) => <option key={k} value={k}>{l}</option>)}</select>
               <button aria-label="Monter" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === 0} onClick={() => swap("statuses", s, statuses[i - 1])}>↑</button>
@@ -48,8 +48,8 @@ export default function SettingsScreen() {
         <section className="space-y-2">
           <h2 className={section}>Étiquettes</h2>
           {labels.map((l) => (
-            <div key={l.id} className="flex items-center gap-1.5 rounded-xl border border-line bg-surface py-1.5 pl-2.5 pr-1">
-              <input type="color" className="h-7 w-7 shrink-0 cursor-pointer rounded-md border border-line bg-transparent p-0" value={l.color} onChange={(e) => db.update("labels", l.id, { color: e.target.value })} />
+            <div key={l.id} className="flex items-center gap-1.5 group-card py-1.5 pl-2.5 pr-1">
+              <input type="color" className="h-7 w-7 shrink-0 cursor-pointer rounded-full border-0 bg-transparent p-0" value={l.color} onChange={(e) => db.update("labels", l.id, { color: e.target.value })} />
               <input key={l.name} className="h-9 min-w-0 flex-1 bg-transparent px-1 text-[15px] outline-none" defaultValue={l.name} onBlur={(e) => e.target.value.trim() && e.target.value !== l.name && db.update("labels", l.id, { name: e.target.value.trim() })} />
               <button onClick={() => db.remove("labels", l.id)} aria-label="Supprimer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted"><Icon name="trash" size={16} /></button>
             </div>
@@ -61,10 +61,10 @@ export default function SettingsScreen() {
           <h2 className={section}>Champs personnalisés</h2>
           <p className="text-[12.5px] leading-snug text-muted">Apparaissent sur chaque tâche (estimation, environnement, version, lien PR…).</p>
           {fieldDefs.map((f, i) => (
-            <div key={f.id} className="space-y-2 rounded-xl border border-line bg-surface p-2.5">
+            <div key={f.id} className="space-y-2 group-card p-2.5">
               <div className="flex items-center gap-2">
                 <input key={f.name} className={`${input} !py-1`} defaultValue={f.name} onBlur={(e) => e.target.value.trim() && e.target.value !== f.name && db.update("field_defs", f.id, { name: e.target.value.trim() })} />
-                <span className="rounded-md border border-line px-1.5 py-0.5 text-[11.5px] text-muted">{TYPES.find(([k]) => k === f.type)?.[1]}</span>
+                <span className="rounded-full bg-fill px-2 py-0.5 text-[11.5px] text-muted">{TYPES.find(([k]) => k === f.type)?.[1]}</span>
                 <button aria-label="Monter" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === 0} onClick={() => swap("field_defs", f, fieldDefs[i - 1])}>↑</button>
                 <button aria-label="Descendre" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === fieldDefs.length - 1} onClick={() => swap("field_defs", f, fieldDefs[i + 1])}>↓</button>
                 <button onClick={async () => { if (await ask({ title: "Supprimer ce champ ?", message: "Les valeurs déjà saisies seront masquées.", confirm: "Supprimer le champ", danger: true })) db.remove("field_defs", f.id); }} aria-label="Supprimer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted"><Icon name="trash" size={16} /></button>

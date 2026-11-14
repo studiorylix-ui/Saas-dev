@@ -51,7 +51,7 @@ export default function DealScreen({ id }: { id: string }) {
         <section className="space-y-1"><h2 className={section}>Notes</h2><MdEditor value={d.description} onSave={(v) => upd({ description: v })} placeholder="Contexte client, besoins, échanges…" /></section>
         <section className="space-y-2">
           <h2 className={section}>Tâches</h2>
-          {mine.length > 0 && <div className="divide-y divide-line overflow-hidden rounded-xl border border-line">{mine.map((t) => <TaskRow key={t.id} t={t} subs={tasks.filter((x) => x.parent_id === t.id)} />)}</div>}
+          {mine.length > 0 && <div className="group-card divide-y divide-line">{mine.map((t) => <TaskRow key={t.id} t={t} subs={tasks.filter((x) => x.parent_id === t.id)} />)}</div>}
           <input className={`${input} !py-1`} placeholder="Ajouter une tâche à cette affaire" value={ti} onChange={(e) => setTi(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTask()} />
         </section>
         <section className="space-y-2"><h2 className={section}>Posts liés</h2><LinkedPosts type="deal" id={id} /></section>

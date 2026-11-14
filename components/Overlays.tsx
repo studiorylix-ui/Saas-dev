@@ -78,18 +78,18 @@ function MenuHost({ m }: { m: Menu | null }) {
       <div className="mx-auto w-full max-w-[420px] space-y-2" onClick={(e) => e.stopPropagation()}
         style={{ transform: shown ? "none" : "scale(.92) translateY(14px)", opacity: shown ? 1 : 0, transition: `transform 340ms ${EASE}, opacity 200ms` }}>
         {menu.reactions && (
-          <div className="glass-strong mx-auto flex w-fit gap-1 rounded-full p-1.5 shadow-[0_10px_30px_rgba(0,0,0,.12)]">
+          <div className="glass-strong mx-auto flex w-fit gap-1 rounded-full p-1.5 shadow-float">
             {EMOJIS.map((e) => (
               <button key={e} onClick={() => act(() => menu.reactions!.pick(e))}
-                className={`tap inline-flex h-11 w-11 items-center justify-center rounded-full text-[24px] ${menu.reactions!.mine.includes(e) ? "bg-black/10" : ""}`}>{e}</button>
+                className={`tap inline-flex h-11 w-11 items-center justify-center rounded-full text-[24px] ${menu.reactions!.mine.includes(e) ? "bg-fill" : ""}`}>{e}</button>
             ))}
           </div>
         )}
-        <div className="max-h-[38dvh] overflow-hidden rounded-[14px] bg-surface p-3 shadow-[0_10px_40px_rgba(0,0,0,.14)]">{menu.preview}</div>
-        <div className="glass-strong overflow-hidden rounded-[14px] shadow-[0_10px_40px_rgba(0,0,0,.14)]">
+        <div className="max-h-[38dvh] overflow-hidden rounded-[20px] bg-surface p-3 shadow-float">{menu.preview}</div>
+        <div className="glass-strong overflow-hidden rounded-[20px] shadow-float">
           {menu.items.map((it, i) => (
             <button key={it.label} onClick={() => act(it.run)}
-              className={`flex h-[50px] w-full items-center justify-between px-4 text-[16px] active:bg-black/[.06] ${i ? "border-t border-black/[.06]" : ""} ${it.danger ? "text-[#e5484d]" : "text-ink"}`}>
+              className={`flex h-[50px] w-full items-center justify-between px-4 text-[16px] active:bg-fill ${i ? "border-t border-line" : ""} ${it.danger ? "text-danger" : "text-ink"}`}>
               {it.label}<Icon name={it.icon} size={19} />
             </button>
           ))}
@@ -108,11 +108,11 @@ function AskHost({ a }: { a: Ask | null }) {
       style={{ background: shown ? "rgba(0,0,0,.28)" : "rgba(0,0,0,0)", transition: "background 240ms" }}>
       <div className="mx-auto w-full max-w-[460px] space-y-2" onClick={(e) => e.stopPropagation()}
         style={{ transform: shown ? "none" : "translateY(110%)", transition: `transform 380ms ${EASE}` }}>
-        <div className="glass-strong overflow-hidden rounded-[14px] text-center">
+        <div className="glass-strong overflow-hidden rounded-[20px] text-center">
           <div className="px-5 pb-3 pt-4"><div className="text-[13px] font-semibold text-muted">{q.title}</div>{q.message && <div className="mt-1 text-[13px] text-muted">{q.message}</div>}</div>
-          <button onClick={() => done(true)} className={`h-14 w-full border-t border-black/[.08] text-[18px] active:bg-black/[.06] ${q.danger ? "text-[#e5484d]" : "text-ink"}`}>{q.confirm}</button>
+          <button onClick={() => done(true)} className={`h-14 w-full border-t border-line text-[18px] active:bg-fill ${q.danger ? "text-danger" : "text-ink"}`}>{q.confirm}</button>
         </div>
-        <button onClick={() => done(false)} className="h-14 w-full rounded-[14px] bg-surface text-[18px] font-semibold active:bg-subtle">Annuler</button>
+        <button onClick={() => done(false)} className="h-14 w-full rounded-[20px] bg-surface text-[18px] font-semibold active:bg-subtle">Annuler</button>
       </div>
     </div>
   );
@@ -129,7 +129,7 @@ function EditHost({ e }: { e: Edit | null }) {
   const done = (r: string | null) => { set({ edit: null }); ed.done(r); };
   return (
     <div className="fixed inset-0 z-[85]" style={{ background: shown ? "rgba(0,0,0,.28)" : "rgba(0,0,0,0)", transition: "background 240ms" }}>
-      <div className="absolute inset-x-0 bottom-0 mx-auto flex max-w-[640px] flex-col rounded-t-[14px] bg-surface" style={{ top: "calc(var(--vvt, 0px) + env(safe-area-inset-top) + 10px)", height: "calc(var(--vvh, 100dvh) - env(safe-area-inset-top) - 10px)", transform: shown ? "none" : "translateY(105%)", transition: `transform 380ms ${EASE}` }}>
+      <div className="absolute inset-x-0 bottom-0 mx-auto flex max-w-[640px] flex-col rounded-t-[22px] bg-surface" style={{ top: "calc(var(--vvt, 0px) + env(safe-area-inset-top) + 10px)", height: "calc(var(--vvh, 100dvh) - env(safe-area-inset-top) - 10px)", transform: shown ? "none" : "translateY(105%)", transition: `transform 380ms ${EASE}` }}>
         <div className="grid h-14 shrink-0 grid-cols-[1fr_auto_1fr] items-center border-b border-line px-2">
           <button className="tap h-10 justify-self-start rounded-lg px-2.5 text-[16px]" onClick={() => done(null)}>Annuler</button>
           <span className="text-[16px] font-semibold">{ed.title}</span>

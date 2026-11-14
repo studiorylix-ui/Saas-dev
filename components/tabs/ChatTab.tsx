@@ -131,19 +131,19 @@ export default function ChatTab() {
     const n = unread[x.id] ?? 0;
     return (
       <button key={x.id} onClick={() => { setPicked(x.id); setThread(null); }}
-        className={`tap relative inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border pr-3.5 text-[14px] ${x.kind === "dm" ? "pl-1" : "pl-3"} ${on ? "border-ink bg-ink text-white" : "border-black/[.07] bg-white/70 text-ink"}`}>
-        {x.kind === "dm" ? <Avatar name={label(x)} size={26} /> : <span className={on ? "text-white/50" : "text-muted"}>#</span>}
+        className={`tap relative inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border pr-3.5 text-[14px] ${x.kind === "dm" ? "pl-1" : "pl-3"} ${on ? "border-ink bg-ink text-on-accent" : "border-line bg-surface/70 text-ink"}`}>
+        {x.kind === "dm" ? <Avatar name={label(x)} size={26} /> : <span className={on ? "text-on-accent/50" : "text-muted"}>#</span>}
         <span className={n && !on ? "font-semibold" : ""}>{label(x)}</span>
-        {n > 0 && !on && <span className="pop ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-1 text-[10.5px] font-semibold text-white">{n > 99 ? "99+" : n}</span>}
+        {n > 0 && !on && <span className="pop ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-1 text-[10.5px] font-semibold text-on-accent">{n > 99 ? "99+" : n}</span>}
       </button>
     );
   };
 
   const pills = (
-    <div className="border-b border-black/[.06]">
+    <div className="border-b border-line">
       {thread ? (
         <div className="flex items-center gap-2 px-4 pb-2.5">
-          <button onClick={() => setThread(null)} className="tap inline-flex h-9 items-center gap-1 rounded-full border border-black/[.07] bg-white/70 pl-2 pr-3.5 text-[14px]"><Icon name="back" size={18} />{cur?.kind === "dm" ? label(cur) : `#${cur?.name}`}</button>
+          <button onClick={() => setThread(null)} className="tap inline-flex h-9 items-center gap-1 rounded-full bg-surface shadow-card/70 pl-2 pr-3.5 text-[14px]"><Icon name="back" size={18} />{cur?.kind === "dm" ? label(cur) : `#${cur?.name}`}</button>
           <span className="text-[13px] text-muted">Fil · {replies(thread).length} réponse{replies(thread).length > 1 ? "s" : ""}</span>
         </div>
       ) : (
@@ -166,12 +166,12 @@ export default function ChatTab() {
 
   return (
     <TabScaffold title="Discussion" scroll={false} sub={pills}
-      actions={<button aria-label="Nouvelle conversation" onClick={() => setAdding(true)} className={`${roundBtn} !bg-accent !text-white`}><Icon name="plus" size={19} stroke={2.2} /></button>}
+      actions={<button aria-label="Nouvelle conversation" onClick={() => setAdding(true)} className={`${roundBtn} btn-light !text-on-accent`}><Icon name="plus" size={19} stroke={2.2} /></button>}
       footer={cur && (
         <div className="above-tabbar relative">
           {(away || fresh > 0) && (
             <button onClick={() => toBottom(true)} aria-label="Derniers messages"
-              className="tap glass-strong pop absolute -top-12 right-4 inline-flex h-10 min-w-10 items-center justify-center gap-1 rounded-full px-2.5 text-[13px] font-semibold shadow-[0_6px_20px_rgba(0,0,0,.12)]">
+              className="tap glass-strong pop absolute -top-12 right-4 inline-flex h-10 min-w-10 items-center justify-center gap-1 rounded-full px-2.5 text-[13px] font-semibold shadow-float">
               {fresh > 0 && <span>{fresh}</span>}<Icon name="down" size={19} />
             </button>
           )}
@@ -221,7 +221,7 @@ export default function ChatTab() {
             })}
             {!list.length && cur && (
               <div className="rise flex flex-col items-center gap-2 pt-20 text-center">
-                {cur.kind === "dm" ? <Avatar name={label(cur)} size={56} /> : <span className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-line bg-surface text-muted"><Icon name="hash" size={22} /></span>}
+                {cur.kind === "dm" ? <Avatar name={label(cur)} size={56} /> : <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-surface shadow-card text-muted"><Icon name="hash" size={22} /></span>}
                 <p className="mt-1 text-[16px] font-semibold">{cur.kind === "dm" ? label(cur) : `#${cur.name}`}</p>
                 <p className="text-[13px] text-muted">{cur.kind === "dm" ? "Conversation privée : vous deux seulement." : "Aucun message pour l'instant."}</p>
               </div>
@@ -233,13 +233,13 @@ export default function ChatTab() {
 
       <Sheet open={adding} onClose={() => setAdding(false)} title="Nouvelle conversation">
         <div className="px-2 pb-2">
-          <button onClick={newChannel} className="tap flex h-12 w-full items-center gap-3 rounded-[10px] px-2 text-left">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/[.05]"><Icon name="hash" size={18} /></span>
+          <button onClick={newChannel} className="tap flex h-12 w-full items-center gap-3 rounded-[12px] px-2 text-left">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-fill"><Icon name="hash" size={18} /></span>
             <span className="text-[15px] font-medium">Nouveau canal d&apos;équipe</span>
           </button>
           <div className="px-2 pb-1 pt-3 text-[12px] font-medium uppercase tracking-[.06em] text-muted">Message privé</div>
           {profiles.filter((p) => p.id !== me).map((p) => (
-            <button key={p.id} onClick={() => openDm(p.id)} className="tap flex h-12 w-full items-center gap-3 rounded-[10px] px-2 text-left">
+            <button key={p.id} onClick={() => openDm(p.id)} className="tap flex h-12 w-full items-center gap-3 rounded-[12px] px-2 text-left">
               <Avatar name={p.name} size={36} /><span className="text-[15px]">{p.name}</span>
             </button>
           ))}

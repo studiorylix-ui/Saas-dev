@@ -32,19 +32,19 @@ export default function PostsTab() {
       footer={
         <>
           <button aria-label="Nouveau post" onClick={() => write(null)}
-            className="tap fixed z-30 inline-flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-[0_8px_24px_rgba(0,0,0,.2)]"
+            className="tap fixed z-30 inline-flex h-14 w-14 items-center justify-center rounded-full btn-light text-on-accent shadow-float"
             style={{ bottom: "calc(var(--tabbar) + 6px)", right: "max(1rem, calc((100vw - 640px) / 2 + 1rem))" }}>
             <Icon name="plus" size={24} stroke={2.2} />
           </button>
           <PostSheet open={open} onClose={() => { setOpen(false); setQuote(null); }} quote={quote} b={b} />
         </>
       }>
-      <button onClick={() => write(null)} className="tap flex w-full items-center gap-3 border-y border-line bg-surface px-4 py-3 text-left">
-        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-subtle text-muted"><Icon name="plus" size={18} /></span>
+      <button onClick={() => write(null)} className="tap group-card mx-4 mb-3 flex w-[calc(100%-2rem)] items-center gap-3 px-4 py-3 text-left">
+        <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-fill text-muted"><Icon name="plus" size={18} /></span>
         <span className="text-[15px] text-muted">Quoi de neuf ?</span>
       </button>
       {!ready ? <Skeleton /> : (
-        <div className="divide-y divide-line border-b border-line">
+        <div className="group-card mx-4 divide-y divide-line">
           {list.map((p) => <PostCard key={p.id} p={p} b={b} onTag={setTag} onQuote={write} />)}
         </div>
       )}

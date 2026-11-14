@@ -53,7 +53,7 @@ export default function TaskScreen({ id }: { id: string }) {
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 pb-8 pt-4">
         <input key={t.title} className="w-full bg-transparent text-[22px] font-semibold leading-tight tracking-[-0.025em] outline-none" defaultValue={t.title} onBlur={(e) => e.target.value.trim() && e.target.value !== t.title && upd({ title: e.target.value.trim() })} />
 
-        <section className="divide-y divide-line rounded-xl border border-line bg-surface">
+        <section className="group-card divide-y divide-line">
           <Row label="Statut"><select className={plain} value={t.status_id} onChange={(e) => upd({ status_id: e.target.value })}>{statuses.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></Row>
           <Row label="Priorité"><select className={plain} value={t.priority} onChange={(e) => upd({ priority: Number(e.target.value) })}>{PRIORITIES.map((p, i) => <option key={p} value={i}>{p}</option>)}</select></Row>
           <Row label="Assigné à"><select className={plain} value={t.assignee ?? ""} onChange={(e) => upd({ assignee: e.target.value || null })}><option value="">Personne</option>{profiles.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select></Row>
@@ -73,7 +73,7 @@ export default function TaskScreen({ id }: { id: string }) {
         {!t.parent_id && (
           <section className="space-y-2">
             <h2 className={section}>Sous-tâches {subs.length > 0 && `· ${subs.length}`}</h2>
-            {subs.length > 0 && <div className="divide-y divide-line rounded-xl border border-line bg-surface">{subs.map((s) => <div key={s.id} className="flex min-h-11 items-center gap-3 px-3.5"><StatusDot t={s} /><PushLink to={{ k: "task", id: s.id }} className="flex-1 py-2.5 text-[14.5px]">{s.title}</PushLink></div>)}</div>}
+            {subs.length > 0 && <div className="group-card divide-y divide-line">{subs.map((s) => <div key={s.id} className="flex min-h-11 items-center gap-3 px-3.5"><StatusDot t={s} /><PushLink to={{ k: "task", id: s.id }} className="flex-1 py-2.5 text-[14.5px]">{s.title}</PushLink></div>)}</div>}
             <div className="flex gap-2"><input className={`${input} !py-1`} placeholder="Ajouter une sous-tâche" value={sub} onChange={(e) => setSub(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addSub()} /></div>
           </section>
         )}
@@ -83,7 +83,7 @@ export default function TaskScreen({ id }: { id: string }) {
           {comments.filter((c) => c.task_id === id).map((c) => (
             <div key={c.id} className="flex gap-2.5"><Avatar name={name(c.author)} size={26} /><div className="min-w-0 flex-1"><div className="text-[13px]"><b className="font-semibold">{name(c.author)}</b> <span className="text-muted">{ago(c.created_at)}</span></div><Markdown text={c.body} /></div></div>
           ))}
-          <div className="overflow-hidden rounded-xl border border-line"><Composer flat placeholder="Commenter… (@mention)" onSend={(body) => { db.insert("task_comments", { task_id: id, body }); }} /></div>
+          <div className="group-card"><Composer flat placeholder="Commenter… (@mention)" onSend={(body) => { db.insert("task_comments", { task_id: id, body }); }} /></div>
         </section>
 
         <section className="space-y-2"><h2 className={section}>Activité</h2><ActivityFeed id={id} /></section>

@@ -11,6 +11,7 @@ import Stack, { skipNextAnimation } from "./Stack";
 import TabBar from "./TabBar";
 import { Skeleton } from "./TabScaffold";
 import Toasts from "./Toasts";
+import AccountScreen from "./screens/AccountScreen";
 import ActivityScreen from "./screens/ActivityScreen";
 import DealScreen from "./screens/DealScreen";
 import NoteScreen from "./screens/NoteScreen";
@@ -40,6 +41,7 @@ function render(s: Screen) {
     case "search": return <SearchScreen />;
     case "activity": return <ActivityScreen />;
     case "settings": return <SettingsScreen />;
+    case "account": return <AccountScreen />;
   }
 }
 
@@ -115,7 +117,7 @@ export default function Shell() {
   return (
     <NavCtx.Provider value={nav}>
       <RefsProvider>
-        <div className="fixed inset-x-0 mx-auto flex max-w-[640px] flex-col overflow-hidden bg-bg pt-[env(safe-area-inset-top)] sm:border-x sm:border-line"
+        <div className="fixed inset-x-0 mx-auto flex max-w-[640px] flex-col overflow-hidden pt-[env(safe-area-inset-top)]"
           style={{ top: "var(--vvt, 0px)", height: "var(--vvh, 100dvh)" }}>
           <PushBanner />
           <div ref={tabsEl} data-tabs="1" className="relative min-h-0 flex-1 will-change-transform">

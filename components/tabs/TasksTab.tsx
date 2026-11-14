@@ -36,8 +36,8 @@ export default function TasksTab() {
   const dot = (c: string) => <span className="h-2 w-2 rounded-full" style={{ background: c }} />;
   const group = (key: string, head: React.ReactNode, list: Task[]) => list.length > 0 && (
     <section key={key}>
-      <h2 className="flex h-9 items-center gap-2 px-4 text-[13px] font-medium">{head}<span className="font-normal text-muted">{list.length}</span></h2>
-      <div className="divide-y divide-line border-y border-line">{list.map((t) => <TaskRow key={t.id} t={t} subs={subs(t.id)} />)}</div>
+      <h2 className="flex h-9 items-center gap-2 px-6 text-[13px] font-medium">{head}<span className="font-normal text-muted">{list.length}</span></h2>
+      <div className="group-card mx-4 divide-y divide-line">{list.map((t) => <TaskRow key={t.id} t={t} subs={subs(t.id)} />)}</div>
     </section>
   );
 
@@ -45,9 +45,9 @@ export default function TasksTab() {
     <TabScaffold title="Tâches"
       actions={<>
         <RoundPush to={{ k: "settings" }} icon="sliders" label="Personnaliser" />
-        <button aria-label="Ajouter" onClick={() => setAdding(!adding)} className={`${roundBtn} ${adding ? "" : "!bg-accent !text-white"}`}><Icon name={adding ? "x" : "plus"} size={19} stroke={2.2} /></button>
+        <button aria-label="Ajouter" onClick={() => setAdding(!adding)} className={`${roundBtn} ${adding ? "" : "btn-light !text-on-accent"}`}><Icon name={adding ? "x" : "plus"} size={19} stroke={2.2} /></button>
       </>}
-      sub={<div className="space-y-2 border-b border-line px-4 pb-2.5">
+      sub={<div className="space-y-2 px-4 pb-3">
         {adding && (
           <div className="rise flex gap-2 pb-1">
             <input autoFocus className={input} placeholder="Nouvelle tâche" value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") add(); if (e.key === "Escape") setAdding(false); }} />
@@ -61,7 +61,7 @@ export default function TasksTab() {
             <input className={`${sel} w-full pl-8`} placeholder="Filtrer" value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
           <select className={sel} value={label} onChange={(e) => setLabel(e.target.value)}><option value="">Étiquette</option>{labels.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}</select>
-          <button onClick={() => setMine(!mine)} className={`tap h-9 shrink-0 rounded-lg border px-3 text-[13px] ${mine ? "border-ink bg-ink text-white" : "border-line bg-surface"}`}>Moi</button>
+          <button onClick={() => setMine(!mine)} className={`tap h-9 shrink-0 rounded-lg border px-3 text-[13px] ${mine ? "border-ink bg-ink text-on-accent" : "border-line bg-surface"}`}>Moi</button>
         </div>
       </div>}>
       {!ready ? <Skeleton avatar={false} /> : (
@@ -82,7 +82,7 @@ export default function TasksTab() {
                     <h2 className="mb-2 flex items-center gap-2 text-[13px] font-medium">{dot(s.color)}{s.name}<span className="font-normal text-muted">{col.length}</span></h2>
                     <div className="space-y-2">
                       {col.map((t) => (
-                        <div key={t.id} className="overflow-hidden rounded-xl border border-line bg-surface">
+                        <div key={t.id} className="group-card bg-surface">
                           <TaskRow t={t} subs={subs(t.id)} />
                           <div className="border-t border-line px-3 py-1.5">
                             <select aria-label="Déplacer" className="h-8 w-full bg-transparent text-[13px] text-muted outline-none" value={t.status_id} onChange={(e) => db.update("tasks", t.id, { status_id: e.target.value })}>
@@ -91,7 +91,7 @@ export default function TasksTab() {
                           </div>
                         </div>
                       ))}
-                      {!col.length && <div className="rounded-xl border border-dashed border-line py-6 text-center text-[12px] text-muted">Vide</div>}
+                      {!col.length && <div className="rounded-2xl border border-dashed border-line py-6 text-center text-[12px] text-muted">Vide</div>}
                     </div>
                   </div>
                 );

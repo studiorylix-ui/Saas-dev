@@ -32,9 +32,9 @@ export default function Sheet({ open, onClose, title, children }: { open: boolea
     <div className={`fixed inset-0 z-[60] ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
       <div onClick={onClose} className="absolute inset-0 bg-black/30 transition-opacity duration-300" style={{ opacity: open ? 1 : 0 }} />
       <div className="absolute inset-x-0 bottom-0 mx-auto max-w-[640px]" style={{ transform: open ? "translateY(0)" : "translateY(105%)", transition: `transform 420ms ${EASE}` }}>
-        <div ref={panel} className="glass-strong max-h-[85dvh] overflow-y-auto rounded-t-[14px] pb-[max(env(safe-area-inset-bottom),16px)] shadow-[0_-8px_30px_rgba(0,0,0,.08)]">
+        <div ref={panel} className="glass-strong max-h-[85dvh] overflow-y-auto rounded-t-[22px] pb-[max(env(safe-area-inset-bottom),16px)] shadow-float">
           <div {...handlers} className="cursor-grab touch-none pb-1 pt-2">
-            <div className="mx-auto h-[5px] w-9 rounded-full bg-black/15" />
+            <div className="mx-auto h-[5px] w-9 rounded-full bg-ink/15" />
             {title && <div className="px-4 pb-1 pt-3 text-[15px] font-semibold">{title}</div>}
           </div>
           {children}

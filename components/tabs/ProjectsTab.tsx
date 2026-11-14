@@ -37,8 +37,8 @@ export default function ProjectsTab() {
 
   return (
     <TabScaffold title={tab === "projects" ? "Projets" : "Affaires"}
-      actions={<button aria-label="Ajouter" onClick={() => setAdding(!adding)} className={`${roundBtn} ${adding ? "" : "!bg-accent !text-white"}`}><Icon name={adding ? "x" : "plus"} size={19} stroke={2.2} /></button>}
-      sub={<div className="space-y-2 border-b border-line px-4 pb-2.5">
+      actions={<button aria-label="Ajouter" onClick={() => setAdding(!adding)} className={`${roundBtn} ${adding ? "" : "btn-light !text-on-accent"}`}><Icon name={adding ? "x" : "plus"} size={19} stroke={2.2} /></button>}
+      sub={<div className="space-y-2 px-4 pb-3">
         {adding && (
           <div className="rise flex gap-2 pb-1">
             <input autoFocus className={input} placeholder={tab === "projects" ? "Nouveau projet (crée aussi son canal)" : "Nouvelle affaire"} value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") add(); if (e.key === "Escape") setAdding(false); }} />
@@ -49,7 +49,7 @@ export default function ProjectsTab() {
       </div>}>
       {!ready ? <Skeleton avatar={false} /> : <div>
         {tab === "projects" ? (!projects.length ? <p className="py-20 text-center text-[13px] text-muted">Aucun projet. Chaque projet crée aussi son canal de discussion.</p> :
-          <div className="divide-y divide-line border-b border-line">
+          <div className="group-card mx-4 divide-y divide-line">
             {projects.map((p) => {
               const t = tasks.filter((x) => x.project_id === p.id && !x.parent_id);
               const done = t.filter(isDone).length;
@@ -68,7 +68,7 @@ export default function ProjectsTab() {
                   <div className="mt-2 flex items-center gap-3 text-[12px] text-muted">
                     <span className="inline-flex items-center gap-1.5"><span className="h-1.5 w-1.5 rounded-full" style={{ background: STATUS_DOT[p.status] }} />{p.status}</span>
                     <span>{done}/{t.length} tâches</span>
-                    {p.due_date && <span className={`inline-flex items-center gap-1 ${overdue(p.due_date) && p.status !== "terminé" ? "text-[#d93636]" : ""}`}><Icon name="calendar" size={12} />{day(p.due_date)}</span>}
+                    {p.due_date && <span className={`inline-flex items-center gap-1 ${overdue(p.due_date) && p.status !== "terminé" ? "text-danger" : ""}`}><Icon name="calendar" size={12} />{day(p.due_date)}</span>}
                   </div>
                 </PushLink>
               );
@@ -76,7 +76,7 @@ export default function ProjectsTab() {
           </div>
         ) : (
           <div className="pb-4">
-            <div className="grid grid-cols-3 divide-x divide-line border-b border-line bg-surface">
+            <div className="group-card mx-4 grid grid-cols-3 divide-x divide-line">
               {kpis.map(([l, v]) => <div key={l} className="px-4 py-3"><div className="text-[11.5px] text-muted">{l}</div><div className="mt-0.5 text-[15px] font-semibold tabular-nums tracking-tight">{eur(v)}</div></div>)}
             </div>
             <div className="scroll-x flex snap-x gap-3 overflow-x-auto px-4 pt-3">
@@ -87,13 +87,13 @@ export default function ProjectsTab() {
                     <h2 className="mb-2 flex items-baseline gap-2 text-[13px] font-medium capitalize">{s}<span className="font-normal normal-case text-muted">{col.length} · {eur(col.reduce((a, d) => a + (d.amount ?? 0), 0))}</span></h2>
                     <div className="space-y-2">
                       {col.map((d) => (
-                        <PushLink key={d.id} to={{ k: "deal", id: d.id }} className="tap rise block rounded-xl border border-line bg-surface p-3">
+                        <PushLink key={d.id} to={{ k: "deal", id: d.id }} className="tap rise block group-card p-3">
                           <div className="flex items-start justify-between gap-2"><span className="text-[14.5px] font-medium">{d.name}</span>{d.amount != null && <span className="text-[13px] tabular-nums">{eur(d.amount)}</span>}</div>
                           {d.client && <div className="text-[12.5px] text-muted">{d.client}</div>}
-                          {d.next_action && <div className={`mt-2 border-t border-line pt-2 text-[12px] ${overdue(d.next_action_date) ? "text-[#d93636]" : "text-muted"}`}>{d.next_action}{d.next_action_date && ` · ${day(d.next_action_date)}`}</div>}
+                          {d.next_action && <div className={`mt-2 border-t border-line pt-2 text-[12px] ${overdue(d.next_action_date) ? "text-danger" : "text-muted"}`}>{d.next_action}{d.next_action_date && ` · ${day(d.next_action_date)}`}</div>}
                         </PushLink>
                       ))}
-                      {!col.length && <div className="rounded-xl border border-dashed border-line py-6 text-center text-[12px] text-muted">Vide</div>}
+                      {!col.length && <div className="rounded-2xl border border-dashed border-line py-6 text-center text-[12px] text-muted">Vide</div>}
                     </div>
                   </div>
                 );

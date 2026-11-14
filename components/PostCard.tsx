@@ -31,7 +31,7 @@ function LinkCard({ p, b }: { p: Post; b: Bundle }) {
     : d ? { to: { k: "deal", id: d.id }, kind: "Affaire", label: d.name, icon: "link" } : null;
   if (!x) return null;
   return (
-    <PushLink to={x.to} className="tap mt-2.5 flex items-center gap-3 rounded-[10px] border border-line bg-surface px-3 py-2.5">
+    <PushLink to={x.to} className="tap mt-2.5 flex items-center gap-3 rounded-[14px] bg-fill px-3 py-2.5">
       <Icon name={x.icon} size={18} className="text-muted" />
       <div className="min-w-0 flex-1"><div className="text-[11.5px] text-muted">{x.kind}</div><div className="truncate text-[14px] font-medium">{x.label}</div></div>
       <Icon name="chevron" size={16} className="text-muted" />
@@ -83,13 +83,13 @@ export default function PostCard({ p, b, onTag, onQuote }: { p: Post; b: Bundle;
             {p.images.map((u) => (
               <a key={u} href={u} target="_blank" rel="noopener noreferrer">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={u} alt="" loading="lazy" decoding="async" className={`w-full rounded-[10px] border border-line bg-subtle object-cover ${p.images.length > 1 ? "aspect-square" : "max-h-[420px]"}`} />
+                <img src={u} alt="" loading="lazy" decoding="async" className={`w-full rounded-[16px] bg-subtle object-cover ${p.images.length > 1 ? "aspect-square" : "max-h-[420px]"}`} />
               </a>
             ))}
           </div>
         )}
         {quoted && (
-          <div className="mt-2.5 rounded-[10px] border border-line bg-surface px-3 py-2.5">
+          <div className="mt-2.5 rounded-[14px] bg-fill px-3 py-2.5">
             <div className="flex items-center gap-2 text-[13px]"><Avatar name={name(quoted.author)} size={18} /><span className="font-medium">{name(quoted.author)}</span><span className="text-muted">{ago(quoted.created_at)}</span></div>
             <p className="mt-1 line-clamp-3 text-[14px] text-ink/80">{quoted.body}</p>
           </div>

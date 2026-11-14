@@ -74,11 +74,11 @@ export default function TabScaffold({ title, actions, sub, children, footer, scr
   }
   return (
     <div className="relative flex h-full flex-col" style={vars}>
-      <div className={`absolute inset-x-0 top-0 z-20 border-b transition-[background-color,border-color,backdrop-filter] duration-200 ${collapsed ? "glass border-black/[.06]" : "border-transparent"}`}>{bar}</div>
+      <div className={`absolute inset-x-0 top-0 z-20 border-b transition-[background-color,border-color,backdrop-filter] duration-200 ${collapsed ? "glass border-line" : "border-transparent"}`}>{bar}</div>
       <div ref={box} {...touch} onScroll={(e) => setCollapsed(e.currentTarget.scrollTop > 34)} className="tabpad relative min-h-0 flex-1 overflow-y-auto overscroll-y-contain pt-11">
         {(pull > 0 || refreshing) && (
           <div className="pointer-events-none absolute inset-x-0 top-11 flex justify-center" style={{ height: pull, opacity: Math.min(1, pull / 50) }}>
-            <span className={`mt-3 h-5 w-5 rounded-full border-2 border-black/15 border-t-ink ${refreshing || pull > 58 ? "animate-spin" : ""}`} style={{ transform: refreshing ? undefined : `rotate(${pull * 4}deg)` }} />
+            <span className={`mt-3 h-5 w-5 rounded-full border-2 border-ink/15 border-t-ink ${refreshing || pull > 58 ? "animate-spin" : ""}`} style={{ transform: refreshing ? undefined : `rotate(${pull * 4}deg)` }} />
           </div>
         )}
         <div style={{ transform: pull ? `translateY(${pull}px)` : undefined, transition: dragging ? "none" : "transform 300ms cubic-bezier(.32,.72,0,1)" }}>

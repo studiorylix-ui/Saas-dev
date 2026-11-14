@@ -42,8 +42,8 @@ export default function PushBanner() {
           {state === "ask" ? "Recevoir les notifications de l'équipe" : <>Notifications : <span className="text-muted">Partager › Sur l&apos;écran d&apos;accueil, puis ouvrir l&apos;app.</span></>}
         </span>
         {state === "ask"
-          ? <button className="h-8 rounded-lg bg-accent px-3 text-[13px] font-medium text-white active:opacity-80" onClick={enable}>Activer</button>
-          : <button aria-label="Fermer" className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted active:bg-black/[.05]" onClick={close}><Icon name="x" size={16} /></button>}
+          ? <button className="h-8 rounded-lg bg-accent px-3 text-[13px] font-medium text-on-accent active:opacity-80" onClick={enable}>Activer</button>
+          : <button aria-label="Fermer" className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted active:bg-fill" onClick={close}><Icon name="x" size={16} /></button>}
       </div>
     </div>
   );

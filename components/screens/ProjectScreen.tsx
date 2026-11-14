@@ -61,7 +61,7 @@ export default function ProjectScreen({ id }: { id: string }) {
           <label className="space-y-1"><span className="text-muted">Début</span><input type="date" className={`${sel} w-full`} value={p.start_date ?? ""} onChange={(e) => upd({ start_date: e.target.value || null })} /></label>
           <label className="space-y-1"><span className="text-muted">Échéance</span><input type="date" className={`${sel} w-full`} value={p.due_date ?? ""} onChange={(e) => upd({ due_date: e.target.value || null })} /></label>
         </section>
-        {chan && <a href={`/chat?c=${chan.id}`} onClick={(e) => { e.preventDefault(); openChat(chan.id); }} className="flex h-11 items-center gap-2.5 rounded-xl border border-line bg-surface px-3.5 text-[14px] active:bg-subtle"><Icon name="chat" size={17} className="text-muted" /><span className="flex-1">#{chan.name}</span><Icon name="chevron" size={16} className="text-muted" /></a>}
+        {chan && <a href={`/chat?c=${chan.id}`} onClick={(e) => { e.preventDefault(); openChat(chan.id); }} className="flex h-11 items-center gap-2.5 group-card px-3.5 text-[14px] active:bg-subtle"><Icon name="chat" size={17} className="text-muted" /><span className="flex-1">#{chan.name}</span><Icon name="chevron" size={16} className="text-muted" /></a>}
         <section className="space-y-1"><h2 className={section}>Description</h2><MdEditor value={p.description} onSave={(v) => upd({ description: v })} placeholder="Objectif, périmètre, liens, stack…" /></section>
 
         <section className="space-y-2">
@@ -80,7 +80,7 @@ export default function ProjectScreen({ id }: { id: string }) {
 
         <section className="space-y-2">
           <h2 className={section}>Tâches</h2>
-          {mine.length > 0 && <div className="divide-y divide-line overflow-hidden rounded-xl border border-line">{mine.map((t) => <TaskRow key={t.id} t={t} subs={tasks.filter((x) => x.parent_id === t.id)} />)}</div>}
+          {mine.length > 0 && <div className="group-card divide-y divide-line">{mine.map((t) => <TaskRow key={t.id} t={t} subs={tasks.filter((x) => x.parent_id === t.id)} />)}</div>}
           <input className={`${input} !py-1`} placeholder="Ajouter une tâche à ce projet" value={ti} onChange={(e) => setTi(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addTask()} />
         </section>
         <section className="space-y-2"><h2 className={section}>Posts liés</h2><LinkedPosts type="project" id={id} /></section>

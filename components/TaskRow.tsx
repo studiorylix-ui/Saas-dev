@@ -46,7 +46,7 @@ export default function TaskRow({ t, subs }: { t: Task; subs?: Task[] }) {
           <span className="font-mono text-[11.5px] tracking-tight">RYL-{t.num ?? "…"}</span>
           {t.priority > 0 && <Prio p={t.priority} />}
           {t.labels.map((id) => { const l = labels.find((x) => x.id === id); return l && <span key={id} className="inline-flex items-center gap-1"><span className="h-1.5 w-1.5 rounded-full" style={{ background: l.color }} />{l.name}</span>; })}
-          {t.due && <span className={`inline-flex items-center gap-1 ${overdue(t.due) && !done ? "text-[#d93636]" : ""}`}><Icon name="calendar" size={12} />{day(t.due)}</span>}
+          {t.due && <span className={`inline-flex items-center gap-1 ${overdue(t.due) && !done ? "text-danger" : ""}`}><Icon name="calendar" size={12} />{day(t.due)}</span>}
           {subs && subs.length > 0 && <span className="inline-flex items-center gap-1"><Icon name="check" size={12} />{sd}/{subs.length}</span>}
         </div>
       </PushLink>
