@@ -1,5 +1,5 @@
 "use client";
-import { useTable } from "@/lib/useTable";
+import { useTable } from "@/lib/store";
 import { describe } from "@/lib/activity";
 import { ago } from "@/lib/ui";
 import type { Activity } from "@/lib/types";

@@ -23,16 +23,16 @@ export async function POST(req: Request) {
     if (ch?.kind === "dm") only = ch.members; // message privé : seulement l'autre membre
   }
   else if (table === "posts") {
-    msg = { title: r.parent_id ? `${who} a répondu` : `${who} · nouveau post`, body: cut(r.body || "📷 photo"), url: `/posts/${r.parent_id ?? r.id}` };
+    msg = { title: r.parent_id ? `${who} a répondu` : `${who} · nouveau post`, body: cut(r.body || "📷 photo"), url: `/posts?s=post.${r.parent_id ?? r.id}` };
     mention = { ...msg, title: `${who} vous a mentionné` };
   } else if (table === "tasks" && op === "UPDATE") {
     if (!r.assignee) return new Response("ignored");
-    msg = { title: `${who} vous a assigné une tâche`, body: cut(`RYL-${r.num} ${r.title}`), url: `/tasks/${r.id}` };
+    msg = { title: `${who} vous a assigné une tâche`, body: cut(`RYL-${r.num} ${r.title}`), url: `/tasks?s=task.${r.id}` };
     only = [r.assignee];
-  } else if (table === "tasks") msg = { title: `${who} · nouvelle tâche`, body: cut(`RYL-${r.num} ${r.title}`), url: `/tasks/${r.id}` };
-  else if (table === "task_comments") msg = { title: `${who} · commentaire`, body: cut(r.body), url: `/tasks/${r.task_id}` };
-  else if (table === "deals") msg = { title: `${who} · nouvelle affaire`, body: cut(r.name), url: `/deals/${r.id}` };
-  else if (table === "projects") msg = { title: `${who} · nouveau projet`, body: cut(r.name), url: `/projects/${r.id}` };
+  } else if (table === "tasks") msg = { title: `${who} · nouvelle tâche`, body: cut(`RYL-${r.num} ${r.title}`), url: `/tasks?s=task.${r.id}` };
+  else if (table === "task_comments") msg = { title: `${who} · commentaire`, body: cut(r.body), url: `/tasks?s=task.${r.task_id}` };
+  else if (table === "deals") msg = { title: `${who} · nouvelle affaire`, body: cut(r.name), url: `/projects?s=deal.${r.id}` };
+  else if (table === "projects") msg = { title: `${who} · nouveau projet`, body: cut(r.name), url: `/projects?s=project.${r.id}` };
   if (!msg) return new Response("ignored");
 
   webpush.setVapidDetails("mailto:noreply@example.com", process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!, process.env.VAPID_PRIVATE_KEY!);

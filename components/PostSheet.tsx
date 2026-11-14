@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { sb } from "@/lib/supabase/client";
+import { db } from "@/lib/store";
 import { sel } from "@/lib/ui";
 import Avatar from "./Avatar";
 import { Suggestions, Thumbs } from "./Composer";
@@ -16,7 +16,7 @@ export default function PostSheet({ open, onClose, quote, b }: { open: boolean; 
   const [lid, setLid] = useState("");
   const [linking, setLinking] = useState(false);
   const { ta, ...c } = useComposer(async (body, images, mentions) => {
-    await sb().from("posts").insert({ body, images, mentions, quote_id: quote, link_type: lt || null, link_id: lt && lid ? lid : null });
+    db.insert("posts", { body, images, mentions, quote_id: quote, parent_id: null, link_type: lt || null, link_id: lt && lid ? lid : null });
   });
   const quoted = quote ? b.posts.find((p) => p.id === quote) : null;
   const items = lt === "task" ? b.tasks.map((t) => [t.id, `RYL-${t.num} ${t.title}`]) : lt === "project" ? b.projects.map((p) => [p.id, p.name]) : lt === "deal" ? b.deals.map((d) => [d.id, d.name]) : [];

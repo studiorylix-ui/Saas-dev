@@ -1,7 +1,4 @@
-"use client";
-import { Suspense } from "react";
-import Chat from "@/components/Chat";
-
+// Contenu rendu par <Shell /> (onglets gardés en mémoire).
 export default function Page() {
-  return <Suspense><Chat /></Suspense>;
+  return null;
 }

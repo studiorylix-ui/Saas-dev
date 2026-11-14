@@ -1,22 +1,21 @@
 "use client";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
-import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import ActivityFeed from "@/components/ActivityFeed";
-import Header from "@/components/Header";
-import Icon from "@/components/Icon";
-import LinkedPosts from "@/components/LinkedPosts";
-import MdEditor from "@/components/MdEditor";
-import { useRefs } from "@/components/Refs";
-import TaskRow from "@/components/TaskRow";
-import { sb } from "@/lib/supabase/client";
+import ActivityFeed from "../ActivityFeed";
+import Header from "../Header";
+import { useNav } from "../nav";
+import Icon from "../Icon";
+import LinkedPosts from "../LinkedPosts";
+import MdEditor from "../MdEditor";
+import { useRefs } from "../Refs";
+import TaskRow from "../TaskRow";
 import { firstTodo } from "@/lib/tasks";
-import { useTable } from "@/lib/useTable";
+import { db, useTable } from "@/lib/store";
 import { PROJECT_STATUS, day, iconBtn, input, section, sel } from "@/lib/ui";
 import type { Milestone, Project, Task } from "@/lib/types";
 
-export default function ProjectPage() {
-  const { id } = useParams<{ id: string }>();
+export default function ProjectScreen({ id }: { id: string }) {
+  const { back } = useNav();
   const router = useRouter();
   const { statuses, profiles, channels } = useRefs();
   const { rows: projects } = useTable<Project>("projects");
@@ -25,29 +24,30 @@ export default function ProjectPage() {
   const [ti, setTi] = useState("");
   const [mi, setMi] = useState("");
   const p = projects.find((x) => x.id === id);
-  if (!p) return <div className="p-4 text-muted">Chargement…</div>;
+  if (!p) return <><Header title="" /><p className="p-4 text-[13px] text-muted">Projet introuvable.</p></>;
 
   const mine = tasks.filter((t) => t.project_id === id && !t.parent_id);
   const done = mine.filter((t) => statuses.find((s) => s.id === t.status_id)?.kind === "done").length;
   const pct = mine.length ? Math.round((done / mine.length) * 100) : 0;
   const mil = ms.filter((m) => m.project_id === id);
   const chan = channels.find((c) => c.project_id === id);
-  const upd = (patch: Partial<Project>) => sb().from("projects").update(patch).eq("id", id).then(() => {});
-  async function addTask() {
+  const openChat = (c: string) => { back(); setTimeout(() => router.push(`/chat?c=${c}`), 400); };
+  const upd = (patch: Partial<Project>) => db.update("projects", id, patch);
+  function addTask() {
     const s = firstTodo(statuses);
     if (!ti.trim() || !s) return;
-    await sb().from("tasks").insert({ title: ti.trim(), status_id: s.id, project_id: id });
+    db.insert("tasks", { title: ti.trim(), status_id: s.id, project_id: id, priority: 0, labels: [], fields: {}, description: "", assignee: null, due: null, deal_id: null, parent_id: null });
     setTi("");
   }
-  async function addMs() {
+  function addMs() {
     if (!mi.trim()) return;
-    await sb().from("milestones").insert({ project_id: id, title: mi.trim() });
+    db.insert("milestones", { project_id: id, title: mi.trim(), due: null, done: false });
     setMi("");
   }
 
   return (
     <div className="flex h-full flex-col">
-      <Header title="Projet" back="/projects"><button className={iconBtn} aria-label="Supprimer" onClick={async () => { if (confirm("Supprimer ce projet ? Ses tâches sont conservées sans projet.")) { await sb().from("projects").delete().eq("id", id); router.replace("/projects"); } }}><Icon name="trash" size={18} className="text-muted" /></button></Header>
+      <Header title="Projet"><button className={iconBtn} aria-label="Supprimer" onClick={() => { if (confirm("Supprimer ce projet ? Ses tâches sont conservées sans projet.")) { db.remove("projects", id); back(); } }}><Icon name="trash" size={18} className="text-muted" /></button></Header>
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 pb-8 pt-4">
         <input key={p.name} className="w-full bg-transparent text-[22px] font-semibold leading-tight tracking-[-0.025em] outline-none" defaultValue={p.name} onBlur={(e) => e.target.value.trim() && e.target.value !== p.name && upd({ name: e.target.value.trim() })} />
         <div>
@@ -60,17 +60,17 @@ export default function ProjectPage() {
           <label className="space-y-1"><span className="text-muted">Début</span><input type="date" className={`${sel} w-full`} value={p.start_date ?? ""} onChange={(e) => upd({ start_date: e.target.value || null })} /></label>
           <label className="space-y-1"><span className="text-muted">Échéance</span><input type="date" className={`${sel} w-full`} value={p.due_date ?? ""} onChange={(e) => upd({ due_date: e.target.value || null })} /></label>
         </section>
-        {chan && <Link href={`/chat?c=${chan.id}`} className="flex h-11 items-center gap-2.5 rounded-xl border border-line bg-surface px-3.5 text-[14px] active:bg-subtle"><Icon name="chat" size={17} className="text-muted" /><span className="flex-1">#{chan.name}</span><Icon name="chevron" size={16} className="text-muted" /></Link>}
+        {chan && <a href={`/chat?c=${chan.id}`} onClick={(e) => { e.preventDefault(); openChat(chan.id); }} className="flex h-11 items-center gap-2.5 rounded-xl border border-line bg-surface px-3.5 text-[14px] active:bg-subtle"><Icon name="chat" size={17} className="text-muted" /><span className="flex-1">#{chan.name}</span><Icon name="chevron" size={16} className="text-muted" /></a>}
         <section className="space-y-1"><h2 className={section}>Description</h2><MdEditor value={p.description} onSave={(v) => upd({ description: v })} placeholder="Objectif, périmètre, liens, stack…" /></section>
 
         <section className="space-y-2">
           <h2 className={section}>Jalons {mil.length > 0 && `· ${mil.filter((m) => m.done).length}/${mil.length}`}</h2>
           {mil.map((m) => (
             <div key={m.id} className="flex items-center gap-3 text-sm">
-              <input type="checkbox" className="h-5 w-5" checked={m.done} onChange={(e) => sb().from("milestones").update({ done: e.target.checked }).eq("id", m.id).then(() => {})} />
+              <input type="checkbox" className="h-5 w-5" checked={m.done} onChange={(e) => db.update("milestones", m.id, { done: e.target.checked })} />
               <span className={`flex-1 ${m.done ? "line-through opacity-50" : ""}`}>{m.title}</span>
-              <input type="date" className={sel} value={m.due ?? ""} onChange={(e) => sb().from("milestones").update({ due: e.target.value || null }).eq("id", m.id).then(() => {})} />
-              <button aria-label="Supprimer le jalon" className="inline-flex h-9 w-9 items-center justify-center text-muted" onClick={() => sb().from("milestones").delete().eq("id", m.id).then(() => {})}><Icon name="x" size={15} /></button>
+              <input type="date" className={sel} value={m.due ?? ""} onChange={(e) => db.update("milestones", m.id, { due: e.target.value || null })} />
+              <button aria-label="Supprimer le jalon" className="inline-flex h-9 w-9 items-center justify-center text-muted" onClick={() => db.remove("milestones", m.id)}><Icon name="x" size={15} /></button>
             </div>
           ))}
           <input className={`${input} !py-1`} placeholder="Ajouter un jalon (ex : MVP, bêta…)" value={mi} onChange={(e) => setMi(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addMs()} />

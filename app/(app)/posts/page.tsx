@@ -1,6 +1,4 @@
-"use client";
-import Posts from "@/components/Posts";
-
+// Contenu rendu par <Shell /> (onglets gardés en mémoire).
 export default function Page() {
-  return <Posts />;
+  return null;
 }

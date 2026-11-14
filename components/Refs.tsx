@@ -1,11 +1,11 @@
 "use client";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { sb } from "@/lib/supabase/client";
-import { useMe, useTable } from "@/lib/useTable";
+import { db, useMe, useTable } from "@/lib/store";
 import type { Activity, Channel, Comment, FieldDef, Label, Msg, Post, PostLike, Profile, Read, Status, Task } from "@/lib/types";
 import type { IconName } from "./Icon";
+import type { Screen } from "./nav";
 
-export type FeedItem = { id: string; at: string; actor: string; icon: IconName; text: string; sub: string; href: string };
+export type FeedItem = { id: string; at: string; actor: string; icon: IconName; text: string; sub: string; to: Screen };
 
 type Refs = {
   me: string | null; profiles: Profile[]; name: (id?: string | null) => string;
@@ -50,7 +50,7 @@ export default function RefsProvider({ children }: { children: React.ReactNode }
   const markRead = (channelId: string) => {
     const last = messages.filter((m) => m.channel_id === channelId).at(-1)?.created_at;
     const cur = reads.find((x) => x.channel_id === channelId)?.last_read_at;
-    if (last && after(last, cur)) sb().from("reads").upsert({ channel_id: channelId, last_read_at: last }).then(() => {});
+    if (last && after(last, cur)) db.upsert("reads", { channel_id: channelId, last_read_at: last });
   };
 
   const feed = useMemo(() => {
@@ -59,15 +59,15 @@ export default function RefsProvider({ children }: { children: React.ReactNode }
     const mine = new Set(posts.filter((p) => p.author === me).map((p) => p.id));
     const body = (id: string) => posts.find((p) => p.id === id)?.body ?? "";
     const items: FeedItem[] = [
-      ...posts.filter((p) => p.author !== me && p.mentions.includes(me)).map((p) => ({ id: `m${p.id}`, at: p.created_at, actor: p.author, icon: "at" as IconName, text: "vous a mentionné", sub: p.body, href: `/posts/${p.parent_id ?? p.id}` })),
-      ...posts.filter((p) => p.author !== me && p.parent_id && mine.has(p.parent_id) && !p.mentions.includes(me)).map((p) => ({ id: `r${p.id}`, at: p.created_at, actor: p.author, icon: "chat" as IconName, text: "a répondu à votre post", sub: p.body, href: `/posts/${p.parent_id}` })),
-      ...likes.filter((l) => l.user_id !== me && mine.has(l.post_id)).map((l) => ({ id: `l${l.post_id}${l.user_id}`, at: l.created_at, actor: l.user_id, icon: "heart" as IconName, text: "a aimé votre post", sub: body(l.post_id), href: `/posts/${l.post_id}` })),
-      ...activity.filter((a) => a.entity === "tasks" && a.actor !== me && a.changes.assignee?.[1] === me).map((a) => ({ id: `a${a.id}`, at: a.created_at, actor: a.actor ?? "", icon: "check" as IconName, text: "vous a assigné une tâche", sub: tasks.find((t) => t.id === a.entity_id)?.title ?? "", href: `/tasks/${a.entity_id}` })),
+      ...posts.filter((p) => p.author !== me && p.mentions.includes(me)).map((p) => ({ id: `m${p.id}`, at: p.created_at, actor: p.author, icon: "at" as IconName, text: "vous a mentionné", sub: p.body, to: { k: "post" as const, id: p.parent_id ?? p.id } })),
+      ...posts.filter((p) => p.author !== me && p.parent_id && mine.has(p.parent_id) && !p.mentions.includes(me)).map((p) => ({ id: `r${p.id}`, at: p.created_at, actor: p.author, icon: "chat" as IconName, text: "a répondu à votre post", sub: p.body, to: { k: "post" as const, id: p.parent_id! } })),
+      ...likes.filter((l) => l.user_id !== me && mine.has(l.post_id)).map((l) => ({ id: `l${l.post_id}${l.user_id}`, at: l.created_at, actor: l.user_id, icon: "heart" as IconName, text: "a aimé votre post", sub: body(l.post_id), to: { k: "post" as const, id: l.post_id } })),
+      ...activity.filter((a) => a.entity === "tasks" && a.actor !== me && a.changes.assignee?.[1] === me).map((a) => ({ id: `a${a.id}`, at: a.created_at, actor: a.actor ?? "", icon: "check" as IconName, text: "vous a assigné une tâche", sub: tasks.find((t) => t.id === a.entity_id)?.title ?? "", to: { k: "task" as const, id: a.entity_id } })),
       ...comments.filter((c) => {
         if (c.author === me) return false;
         const t = tasks.find((x) => x.id === c.task_id);
         return t?.assignee === me || t?.author === me || (!!myName && new RegExp(`@${myName}\\b`, "i").test(c.body));
-      }).map((c) => ({ id: `c${c.id}`, at: c.created_at, actor: c.author, icon: "chat" as IconName, text: "a commenté une tâche", sub: c.body, href: `/tasks/${c.task_id}` })),
+      }).map((c) => ({ id: `c${c.id}`, at: c.created_at, actor: c.author, icon: "chat" as IconName, text: "a commenté une tâche", sub: c.body, to: { k: "task" as const, id: c.task_id } })),
     ];
     return items.sort((a, b) => b.at.localeCompare(a.at)).slice(0, 100);
   }, [me, profiles, posts, likes, activity, comments, tasks]);

@@ -1,12 +1,11 @@
 "use client";
-import Link from "next/link";
-import { sb } from "@/lib/supabase/client";
-import { useTable } from "@/lib/useTable";
+import { db, useTable } from "@/lib/store";
 import { ago } from "@/lib/ui";
 import type { Deal, Post, PostLike, Project, Task } from "@/lib/types";
 import Avatar from "./Avatar";
 import Icon, { type IconName } from "./Icon";
 import Markdown from "./Markdown";
+import { PushLink, type Screen } from "./nav";
 import { useRefs } from "./Refs";
 
 export type Bundle = { posts: Post[]; likes: PostLike[]; tasks: Task[]; projects: Project[]; deals: Deal[] };
@@ -25,23 +24,23 @@ function LinkCard({ p, b }: { p: Post; b: Bundle }) {
   const t = p.link_type === "task" ? b.tasks.find((x) => x.id === p.link_id) : null;
   const pr = p.link_type === "project" ? b.projects.find((x) => x.id === p.link_id) : null;
   const d = p.link_type === "deal" ? b.deals.find((x) => x.id === p.link_id) : null;
-  const x = t ? { href: `/tasks/${t.id}`, kind: `Tâche · RYL-${t.num}`, label: t.title, icon: "check" as IconName }
-    : pr ? { href: `/projects/${pr.id}`, kind: "Projet", label: pr.name, icon: "folder" as IconName }
-    : d ? { href: `/deals/${d.id}`, kind: "Affaire", label: d.name, icon: "link" as IconName } : null;
+  const x: { to: Screen; kind: string; label: string; icon: IconName } | null = t ? { to: { k: "task", id: t.id }, kind: `Tâche · RYL-${t.num ?? "…"}`, label: t.title, icon: "check" }
+    : pr ? { to: { k: "project", id: pr.id }, kind: "Projet", label: pr.name, icon: "folder" }
+    : d ? { to: { k: "deal", id: d.id }, kind: "Affaire", label: d.name, icon: "link" } : null;
   if (!x) return null;
   return (
-    <Link href={x.href} className="mt-2.5 flex items-center gap-3 rounded-[10px] border border-line bg-surface px-3 py-2.5 transition-colors duration-150 active:bg-subtle">
+    <PushLink to={x.to} className="tap mt-2.5 flex items-center gap-3 rounded-[10px] border border-line bg-surface px-3 py-2.5">
       <Icon name={x.icon} size={18} className="text-muted" />
       <div className="min-w-0 flex-1"><div className="text-[11.5px] text-muted">{x.kind}</div><div className="truncate text-[14px] font-medium">{x.label}</div></div>
       <Icon name="chevron" size={16} className="text-muted" />
-    </Link>
+    </PushLink>
   );
 }
 
-const Action = ({ icon, n, on, onClick, href, label }: { icon: IconName; n?: number; on?: boolean; onClick?: () => void; href?: string; label: string }) => {
-  const cls = `-ml-2 inline-flex h-9 min-w-11 items-center gap-1.5 rounded-lg px-2 text-[13px] transition-colors duration-150 active:bg-black/[.05] ${on ? "text-ink" : "text-muted"}`;
-  const inner = <><Icon name={icon} size={18} filled={on && icon === "heart"} />{!!n && <span className="tabular-nums">{n}</span>}</>;
-  return href ? <Link href={href} aria-label={label} className={cls}>{inner}</Link> : <button aria-label={label} onClick={onClick} className={cls}>{inner}</button>;
+const Action = ({ icon, n, on, onClick, to, label }: { icon: IconName; n?: number; on?: boolean; onClick?: () => void; to?: Screen; label: string }) => {
+  const cls = `tap -ml-2 inline-flex h-9 min-w-11 items-center gap-1.5 rounded-lg px-2 text-[13px] ${on ? "text-ink" : "text-muted"}`;
+  const inner = <><span key={String(on)} className={on ? "pop" : ""}><Icon name={icon} size={18} filled={on && icon === "heart"} /></span>{!!n && <span className="tabular-nums">{n}</span>}</>;
+  return to ? <PushLink to={to} label={label} className={cls}>{inner}</PushLink> : <button aria-label={label} onClick={onClick} className={cls}>{inner}</button>;
 };
 
 // Post façon Threads : avatar, texte Markdown, photos, citation, élément lié, actions.
@@ -52,16 +51,11 @@ export default function PostCard({ p, b, onTag, onQuote }: { p: Post; b: Bundle;
   const liked = likes.some((l) => l.user_id === me);
   const quoted = p.quote_id ? b.posts.find((x) => x.id === p.quote_id) : null;
 
-  async function like() {
-    if (liked) await sb().from("post_likes").delete().match({ post_id: p.id, user_id: me });
-    else await sb().from("post_likes").insert({ post_id: p.id });
-  }
-  async function del() {
-    if (confirm("Supprimer ce post ?")) await sb().from("posts").delete().eq("id", p.id);
-  }
+  const like = () => (liked ? db.remove("post_likes", { post_id: p.id, user_id: me }) : db.insert("post_likes", { post_id: p.id }));
+  const del = () => { if (confirm("Supprimer ce post ?")) db.remove("posts", p.id); };
 
   return (
-    <article className="flex gap-3 px-4 py-3.5">
+    <article className="rise flex gap-3 px-4 py-3.5">
       <Avatar name={name(p.author)} size={36} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -75,7 +69,7 @@ export default function PostCard({ p, b, onTag, onQuote }: { p: Post; b: Bundle;
             {p.images.map((u) => (
               <a key={u} href={u} target="_blank" rel="noopener noreferrer">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={u} alt="" loading="lazy" className={`w-full rounded-[10px] border border-line bg-subtle object-cover ${p.images.length > 1 ? "aspect-square" : "max-h-[420px]"}`} />
+                <img src={u} alt="" loading="lazy" decoding="async" className={`w-full rounded-[10px] border border-line bg-subtle object-cover ${p.images.length > 1 ? "aspect-square" : "max-h-[420px]"}`} />
               </a>
             ))}
           </div>
@@ -89,7 +83,7 @@ export default function PostCard({ p, b, onTag, onQuote }: { p: Post; b: Bundle;
         <LinkCard p={p} b={b} />
         <div className="mt-1.5 flex gap-3">
           <Action icon="heart" n={likes.length} on={liked} onClick={like} label="J'aime" />
-          <Action icon="chat" n={replies} href={`/posts/${p.id}`} label="Répondre" />
+          <Action icon="chat" n={replies} to={{ k: "post", id: p.id }} label="Répondre" />
           {onQuote && <Action icon="repeat" onClick={() => onQuote(p.id)} label="Citer" />}
         </div>
       </div>

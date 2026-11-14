@@ -1,17 +1,13 @@
 import { Suspense } from "react";
-import PushBanner from "@/components/PushBanner";
-import RefsProvider from "@/components/Refs";
-import TabBar from "@/components/TabBar";
+import Shell from "@/components/Shell";
+import { Skeleton } from "@/components/TabScaffold";
 
-// Colonne plein écran (safe area du haut), contenu défilant ; la barre d'onglets flotte par-dessus.
+// Tout l'intérieur de l'app est rendu côté téléphone par <Shell /> ; les pages d'onglet sont vides.
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
-    <RefsProvider>
-      <div className="mx-auto flex h-dvh max-w-[640px] flex-col bg-bg pt-[env(safe-area-inset-top)] sm:border-x sm:border-line">
-        <PushBanner />
-        <div className="flex min-h-0 flex-1 flex-col"><Suspense>{children}</Suspense></div>
-      </div>
-      <Suspense><TabBar /></Suspense>
-    </RefsProvider>
+    <>
+      <Suspense fallback={<div className="pt-[env(safe-area-inset-top)]"><Skeleton rows={8} /></div>}><Shell /></Suspense>
+      {children}
+    </>
   );
 }

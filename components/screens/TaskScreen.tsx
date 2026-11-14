@@ -1,19 +1,18 @@
 "use client";
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import ActivityFeed from "@/components/ActivityFeed";
-import Avatar from "@/components/Avatar";
-import Composer from "@/components/Composer";
-import FieldInput from "@/components/FieldInput";
-import Header from "@/components/Header";
-import Icon from "@/components/Icon";
-import Markdown from "@/components/Markdown";
-import MdEditor from "@/components/MdEditor";
-import { useRefs } from "@/components/Refs";
-import { StatusDot } from "@/components/TaskRow";
-import { sb } from "@/lib/supabase/client";
+import ActivityFeed from "../ActivityFeed";
+import Avatar from "../Avatar";
+import Composer from "../Composer";
+import FieldInput from "../FieldInput";
+import Header from "../Header";
+import { PushLink, useNav } from "../nav";
+import Icon from "../Icon";
+import Markdown from "../Markdown";
+import MdEditor from "../MdEditor";
+import { useRefs } from "../Refs";
+import { StatusDot } from "../TaskRow";
 import { firstTodo } from "@/lib/tasks";
-import { useTable } from "@/lib/useTable";
+import { db, useTable } from "@/lib/store";
 import { PRIORITIES, ago, iconBtn, input, pill, plain, section } from "@/lib/ui";
 import type { Comment, Deal, Project, Task } from "@/lib/types";
 
@@ -21,9 +20,8 @@ const Row = ({ label, children }: { label: string; children: React.ReactNode }) 
   <div className="flex min-h-11 items-center justify-between gap-3 pl-3.5 pr-1.5"><span className="shrink-0 text-[14px] text-muted">{label}</span><div className="flex min-w-0 justify-end">{children}</div></div>
 );
 
-export default function TaskPage() {
-  const { id } = useParams<{ id: string }>();
-  const router = useRouter();
+export default function TaskScreen({ id }: { id: string }) {
+  const { back } = useNav();
   const { statuses, labels, fieldDefs, profiles, name } = useRefs();
   const { rows } = useTable<Task>("tasks");
   const { rows: projects } = useTable<Project>("projects");
@@ -31,26 +29,26 @@ export default function TaskPage() {
   const { rows: comments } = useTable<Comment>("task_comments", "created_at", true);
   const [sub, setSub] = useState("");
   const t = rows.find((x) => x.id === id);
-  if (!t) return <div className="p-4 text-muted">Chargement…</div>;
+  if (!t) return <><Header title="" /><p className="p-4 text-[13px] text-muted">Tâche introuvable.</p></>;
 
   const subs = rows.filter((x) => x.parent_id === id);
-  const upd = (patch: Partial<Task>) => sb().from("tasks").update(patch).eq("id", id).then(() => {});
+  const upd = (patch: Partial<Task>) => db.update("tasks", id, patch);
   const toggleLabel = (l: string) => upd({ labels: t.labels.includes(l) ? t.labels.filter((x) => x !== l) : [...t.labels, l] });
-  async function addSub() {
+  function addSub() {
     const s = firstTodo(statuses);
     if (!sub.trim() || !s) return;
-    await sb().from("tasks").insert({ title: sub.trim(), status_id: s.id, parent_id: id, project_id: t!.project_id });
+    db.insert("tasks", { title: sub.trim(), status_id: s.id, parent_id: id, project_id: t!.project_id, priority: 0, labels: [], fields: {}, description: "", assignee: null, due: null, deal_id: null });
     setSub("");
   }
-  async function del() {
+  function del() {
     if (!confirm("Supprimer cette tâche et ses sous-tâches ?")) return;
-    await sb().from("tasks").delete().eq("id", id);
-    router.replace("/tasks");
+    db.remove("tasks", id);
+    back();
   }
 
   return (
     <div className="flex h-full flex-col">
-      <Header title={`RYL-${t.num}`} back={t.parent_id ? `/tasks/${t.parent_id}` : "/tasks"}><button className={iconBtn} aria-label="Supprimer" onClick={del}><Icon name="trash" size={18} className="text-muted" /></button></Header>
+      <Header title={`RYL-${t.num ?? "…"}`}><button className={iconBtn} aria-label="Supprimer" onClick={del}><Icon name="trash" size={18} className="text-muted" /></button></Header>
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 pb-8 pt-4">
         <input key={t.title} className="w-full bg-transparent text-[22px] font-semibold leading-tight tracking-[-0.025em] outline-none" defaultValue={t.title} onBlur={(e) => e.target.value.trim() && e.target.value !== t.title && upd({ title: e.target.value.trim() })} />
 
@@ -74,7 +72,7 @@ export default function TaskPage() {
         {!t.parent_id && (
           <section className="space-y-2">
             <h2 className={section}>Sous-tâches {subs.length > 0 && `· ${subs.length}`}</h2>
-            {subs.length > 0 && <div className="divide-y divide-line rounded-xl border border-line bg-surface">{subs.map((s) => <div key={s.id} className="flex min-h-11 items-center gap-3 px-3.5"><StatusDot t={s} /><a href={`/tasks/${s.id}`} className="flex-1 py-2.5 text-[14.5px]">{s.title}</a></div>)}</div>}
+            {subs.length > 0 && <div className="divide-y divide-line rounded-xl border border-line bg-surface">{subs.map((s) => <div key={s.id} className="flex min-h-11 items-center gap-3 px-3.5"><StatusDot t={s} /><PushLink to={{ k: "task", id: s.id }} className="flex-1 py-2.5 text-[14.5px]">{s.title}</PushLink></div>)}</div>}
             <div className="flex gap-2"><input className={`${input} !py-1`} placeholder="Ajouter une sous-tâche" value={sub} onChange={(e) => setSub(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addSub()} /></div>
           </section>
         )}
@@ -84,7 +82,7 @@ export default function TaskPage() {
           {comments.filter((c) => c.task_id === id).map((c) => (
             <div key={c.id} className="flex gap-2.5"><Avatar name={name(c.author)} size={26} /><div className="min-w-0 flex-1"><div className="text-[13px]"><b className="font-semibold">{name(c.author)}</b> <span className="text-muted">{ago(c.created_at)}</span></div><Markdown text={c.body} /></div></div>
           ))}
-          <div className="overflow-hidden rounded-xl border border-line"><Composer flat placeholder="Commenter… (@mention)" onSend={async (body) => { await sb().from("task_comments").insert({ task_id: id, body }); }} /></div>
+          <div className="overflow-hidden rounded-xl border border-line"><Composer flat placeholder="Commenter… (@mention)" onSend={(body) => { db.insert("task_comments", { task_id: id, body }); }} /></div>
         </section>
 
         <section className="space-y-2"><h2 className={section}>Activité</h2><ActivityFeed id={id} /></section>

@@ -1,41 +1,39 @@
 "use client";
 import { useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import ActivityFeed from "@/components/ActivityFeed";
-import Header from "@/components/Header";
-import Icon from "@/components/Icon";
-import LinkedPosts from "@/components/LinkedPosts";
-import MdEditor from "@/components/MdEditor";
-import { useRefs } from "@/components/Refs";
-import TaskRow from "@/components/TaskRow";
-import { sb } from "@/lib/supabase/client";
+import ActivityFeed from "../ActivityFeed";
+import Header from "../Header";
+import { useNav } from "../nav";
+import Icon from "../Icon";
+import LinkedPosts from "../LinkedPosts";
+import MdEditor from "../MdEditor";
+import { useRefs } from "../Refs";
+import TaskRow from "../TaskRow";
 import { firstTodo } from "@/lib/tasks";
-import { useTable } from "@/lib/useTable";
+import { db, useTable } from "@/lib/store";
 import { STAGES, STAGE_PROB, eur, iconBtn, input, section, sel } from "@/lib/ui";
 import type { Deal, Task } from "@/lib/types";
 
-export default function DealPage() {
-  const { id } = useParams<{ id: string }>();
-  const router = useRouter();
+export default function DealScreen({ id }: { id: string }) {
+  const { back } = useNav();
   const { statuses, profiles } = useRefs();
   const { rows: deals } = useTable<Deal>("deals");
   const { rows: tasks } = useTable<Task>("tasks");
   const [ti, setTi] = useState("");
   const d = deals.find((x) => x.id === id);
-  if (!d) return <div className="p-4 text-muted">Chargement…</div>;
+  if (!d) return <><Header title="" /><p className="p-4 text-[13px] text-muted">Affaire introuvable.</p></>;
 
-  const upd = (patch: Partial<Deal>) => sb().from("deals").update(patch).eq("id", id).then(() => {});
+  const upd = (patch: Partial<Deal>) => db.update("deals", id, patch);
   const mine = tasks.filter((t) => t.deal_id === id && !t.parent_id);
-  async function addTask() {
+  function addTask() {
     const s = firstTodo(statuses);
     if (!ti.trim() || !s) return;
-    await sb().from("tasks").insert({ title: ti.trim(), status_id: s.id, deal_id: id });
+    db.insert("tasks", { title: ti.trim(), status_id: s.id, deal_id: id, priority: 0, labels: [], fields: {}, description: "", assignee: null, due: null, project_id: null, parent_id: null });
     setTi("");
   }
 
   return (
     <div className="flex h-full flex-col">
-      <Header title="Affaire" back="/projects"><button className={iconBtn} aria-label="Supprimer" onClick={async () => { if (confirm("Supprimer cette affaire ?")) { await sb().from("deals").delete().eq("id", id); router.replace("/projects"); } }}><Icon name="trash" size={18} className="text-muted" /></button></Header>
+      <Header title="Affaire"><button className={iconBtn} aria-label="Supprimer" onClick={() => { if (confirm("Supprimer cette affaire ?")) { db.remove("deals", id); back(); } }}><Icon name="trash" size={18} className="text-muted" /></button></Header>
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 pb-8 pt-4">
         <input key={d.name} className="w-full bg-transparent text-[22px] font-semibold leading-tight tracking-[-0.025em] outline-none" defaultValue={d.name} onBlur={(e) => e.target.value.trim() && e.target.value !== d.name && upd({ name: e.target.value.trim() })} />
         <section className="grid grid-cols-2 gap-x-3 gap-y-3 text-[13px]">
