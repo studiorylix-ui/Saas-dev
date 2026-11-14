@@ -13,13 +13,13 @@ import { toast } from "./toast";
  * ponytail: tout en mémoire ; paginer messages/activité si une table dépasse quelques milliers de lignes.
  */
 
-export const TABLES = ["profiles", "statuses", "labels", "field_defs", "channels", "messages", "reads", "posts", "post_likes", "activity", "task_comments", "tasks", "projects", "deals", "milestones", "notes"] as const;
+export const TABLES = ["profiles", "statuses", "labels", "field_defs", "channels", "messages", "reads", "posts", "post_likes", "reactions", "activity", "task_comments", "tasks", "projects", "deals", "milestones", "notes"] as const;
 export type TableName = (typeof TABLES)[number];
 type Row = Record<string, unknown>;
 
-const PK: Partial<Record<TableName, string[]>> = { post_likes: ["post_id", "user_id"], reads: ["user_id", "channel_id"] };
+const PK: Partial<Record<TableName, string[]>> = { post_likes: ["post_id", "user_id"], reads: ["user_id", "channel_id"], reactions: ["message_id", "user_id", "emoji"] };
 const AUTHOR = new Set<TableName>(["notes", "projects", "deals", "tasks", "messages", "posts", "task_comments"]);
-const USER_COL: Partial<Record<TableName, string>> = { post_likes: "user_id", reads: "user_id" };
+const USER_COL: Partial<Record<TableName, string>> = { post_likes: "user_id", reads: "user_id", reactions: "user_id" };
 const SERVER_ONLY = new Set(["created_at", "updated_at", "num"]);
 const pk = (t: TableName) => PK[t] ?? ["id"];
 const keyOf = (t: TableName, r: Row) => pk(t).map((k) => String(r[k])).join(":");
@@ -187,6 +187,25 @@ export const db = {
       if (prev) state[t].map.set(k, prev); else state[t].map.delete(k);
       commit(t);
     });
+  },
+  // Suppression avec « Annuler » : disparaît tout de suite, part au serveur après 4 s si on n'a pas annulé.
+  removeLater(t: TableName, match: string | Row, label: string) {
+    const k = typeof match === "string" ? match : keyOf(t, match);
+    const prev = state[t].map.get(k);
+    if (!prev) return;
+    state[t].map.delete(k);
+    commit(t);
+    let undone = false;
+    toast(label, { label: "Annuler", run: () => { undone = true; state[t].map.set(k, prev); commit(t); } }, 4000);
+    setTimeout(() => {
+      if (undone) return;
+      sb().from(t).delete().match(matchOf(t, prev)).then(({ error }) => {
+        if (!error) return;
+        state[t].map.set(k, prev);
+        commit(t);
+        fail(error);
+      });
+    }, 4100);
   },
   get<R = Row>(t: TableName, id: string) { return state[t].map.get(id) as R | undefined; },
 };

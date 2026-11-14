@@ -18,7 +18,7 @@ export default function NoteScreen({ id }: { id: string }) {
     clearTimeout(timer.current);
     timer.current = setTimeout(() => db.update("notes", id, { ...patch, updated_at: new Date().toISOString() }), 600);
   };
-  const del = () => { if (confirm("Supprimer cette note ?")) { db.remove("notes", id); back(); } };
+  const del = () => { back(); setTimeout(() => db.removeLater("notes", id, "Note supprimée"), 300); };
 
   return (
     <>

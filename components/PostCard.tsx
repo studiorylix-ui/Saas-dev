@@ -5,6 +5,8 @@ import type { Deal, Post, PostLike, Project, Task } from "@/lib/types";
 import Avatar from "./Avatar";
 import Icon, { type IconName } from "./Icon";
 import Markdown from "./Markdown";
+import { editText, openMenu, pressHandlers, type MenuItem } from "./Overlays";
+import { toast } from "@/lib/toast";
 import { PushLink, type Screen } from "./nav";
 import { useRefs } from "./Refs";
 
@@ -52,16 +54,28 @@ export default function PostCard({ p, b, onTag, onQuote }: { p: Post; b: Bundle;
   const quoted = p.quote_id ? b.posts.find((x) => x.id === p.quote_id) : null;
 
   const like = () => (liked ? db.remove("post_likes", { post_id: p.id, user_id: me }) : db.insert("post_likes", { post_id: p.id }));
-  const del = () => { if (confirm("Supprimer ce post ?")) db.remove("posts", p.id); };
+  const menu = () => {
+    const own = p.author === me;
+    const items: MenuItem[] = [
+      ...(onQuote ? [{ label: "Citer", icon: "repeat" as const, run: () => onQuote(p.id) }] : []),
+      ...(p.body ? [{ label: "Copier le texte", icon: "copy" as const, run: () => navigator.clipboard?.writeText(p.body).then(() => toast("Copié")) }] : []),
+      ...(own ? [
+        { label: "Modifier", icon: "edit" as const, run: async () => { const v = await editText({ title: "Modifier le post", value: p.body }); if (v && v !== p.body) db.update("posts", p.id, { body: v, edited_at: new Date().toISOString() }); } },
+        { label: "Supprimer", icon: "trash" as const, danger: true, run: () => db.removeLater("posts", p.id, "Post supprimé") },
+      ] : []),
+    ];
+    openMenu({ preview: <div className="flex gap-3"><Avatar name={name(p.author)} size={32} /><div className="min-w-0 flex-1"><div className="text-[14px] font-semibold">{name(p.author)}</div><p className="line-clamp-5 text-[14.5px]">{p.body || "📷 Photo"}</p></div></div>, items });
+  };
 
   return (
-    <article className="rise flex gap-3 px-4 py-3.5">
+    <article {...pressHandlers(menu)} className="nocallout rise flex gap-3 px-4 py-3.5">
       <Avatar name={name(p.author)} size={36} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-[14.5px] font-semibold">{name(p.author)}</span>
           <span className="text-[13px] text-muted">{ago(p.created_at)}</span>
-          {p.author === me && <button aria-label="Supprimer" className="-mr-2 ml-auto inline-flex h-8 w-8 items-center justify-center rounded-lg text-muted/70 active:bg-black/[.05]" onClick={del}><Icon name="trash" size={15} /></button>}
+          {p.edited_at && <span className="text-[12px] text-muted">· modifié</span>}
+          <button aria-label="Plus d'actions" className="tap -mr-2 ml-auto inline-flex h-8 w-9 items-center justify-center rounded-lg text-muted" onClick={menu}><Icon name="more" size={20} stroke={2.6} /></button>
         </div>
         {p.body && <div className="mt-0.5"><Markdown text={p.body} onTag={onTag} /></div>}
         {p.images.length > 0 && (

@@ -1,8 +1,9 @@
 export type Profile = { id: string; name: string };
 export type Channel = { id: string; name: string; description: string; project_id: string | null; kind: "channel" | "dm"; members: string[] };
 export type Read = { user_id: string; channel_id: string; last_read_at: string };
-export type Msg = { id: string; channel_id: string; body: string; parent_id: string | null; author: string; created_at: string };
-export type Post = { id: string; author: string; body: string; images: string[]; parent_id: string | null; quote_id: string | null; link_type: "task" | "project" | "deal" | null; link_id: string | null; mentions: string[]; created_at: string };
+export type Msg = { id: string; channel_id: string; body: string; parent_id: string | null; author: string; created_at: string; edited_at: string | null };
+export type Reaction = { message_id: string; user_id: string; emoji: string };
+export type Post = { id: string; author: string; body: string; images: string[]; parent_id: string | null; quote_id: string | null; link_type: "task" | "project" | "deal" | null; link_id: string | null; mentions: string[]; created_at: string; edited_at: string | null };
 export type PostLike = { post_id: string; user_id: string; created_at: string };
 export type Note = { id: string; title: string; body: string; author: string; updated_at: string };
 export type Status = { id: string; name: string; color: string; kind: "todo" | "active" | "done"; position: number };

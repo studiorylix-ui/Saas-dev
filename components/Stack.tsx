@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { type Screen, useNav } from "./nav";
 
 type Layer = { key: string; screen: Screen; phase: "enter" | "idle" | "exit" };
-const DUR = 380;
+const DUR = 340;
 export const EASE = "cubic-bezier(.32,.72,0,1)"; // courbe des transitions UIKit
 
 // Signale qu'un retour arrive d'un geste natif (Safari a déjà animé) : pas de seconde animation.
@@ -107,7 +107,7 @@ function Layer({ id, pos, dim, top, swipe, back, under, children }: { id: string
 
   return (
     <div ref={el} data-layer={id} onTouchStart={start} onTouchMove={move} onTouchEnd={end} onTouchCancel={end}
-      className="layer fixed inset-x-0 z-[45] mx-auto flex max-w-[640px] flex-col overflow-hidden bg-bg pt-[env(safe-area-inset-top)] shadow-[-10px_0_30px_rgba(0,0,0,.08)] will-change-transform"
+      className="layer fixed inset-x-0 z-[45] mx-auto flex max-w-[640px] flex-col overflow-hidden bg-bg shadow-[-10px_0_30px_rgba(0,0,0,.08)] will-change-transform"
       style={{ top: "var(--vvt, 0px)", height: "var(--vvh, 100dvh)", transform: pos, transition: `transform ${DUR}ms ${EASE}, filter ${DUR}ms ${EASE}`, filter: dim ? "brightness(.94)" : undefined }}>
       {children}
     </div>

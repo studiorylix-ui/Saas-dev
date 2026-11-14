@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Header from "../Header";
+import { ask } from "../Overlays";
 import Icon from "../Icon";
 import { useRefs } from "../Refs";
 import { db } from "@/lib/store";
@@ -66,7 +67,7 @@ export default function SettingsScreen() {
                 <span className="rounded-md border border-line px-1.5 py-0.5 text-[11.5px] text-muted">{TYPES.find(([k]) => k === f.type)?.[1]}</span>
                 <button aria-label="Monter" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === 0} onClick={() => swap("field_defs", f, fieldDefs[i - 1])}>↑</button>
                 <button aria-label="Descendre" className="inline-flex h-9 w-7 shrink-0 items-center justify-center text-muted disabled:opacity-25" disabled={i === fieldDefs.length - 1} onClick={() => swap("field_defs", f, fieldDefs[i + 1])}>↓</button>
-                <button onClick={() => confirm("Supprimer ce champ ? Les valeurs restent masquées.") && db.remove("field_defs", f.id)} aria-label="Supprimer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted"><Icon name="trash" size={16} /></button>
+                <button onClick={async () => { if (await ask({ title: "Supprimer ce champ ?", message: "Les valeurs déjà saisies seront masquées.", confirm: "Supprimer le champ", danger: true })) db.remove("field_defs", f.id); }} aria-label="Supprimer" className="inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted"><Icon name="trash" size={16} /></button>
               </div>
               {f.type === "select" && <input key={f.options.join()} className={`${input} !py-1`} placeholder="Options séparées par des virgules" defaultValue={f.options.join(", ")} onBlur={(e) => db.update("field_defs", f.id, { options: e.target.value.split(",").map((x) => x.trim()).filter(Boolean) })} />}
             </div>

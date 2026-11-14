@@ -7,7 +7,7 @@ import { useRefs } from "./Refs";
 export type OnSend = (text: string, images: string[], mentions: string[]) => Promise<void> | void;
 
 // Logique commune aux zones de saisie : texte, @mentions suggérées, photos (4 max), envoi.
-export function useComposer(onSend: OnSend) {
+export function useComposer(onSend: OnSend, onTyping?: () => void) {
   const { profiles, me } = useRefs();
   const [text, setText] = useState("");
   const [imgs, setImgs] = useState<string[]>([]);
@@ -19,7 +19,7 @@ export function useComposer(onSend: OnSend) {
   const can = !busy && (!!text.trim() || imgs.length > 0);
 
   const grow = () => { const t = ta.current; if (t) { t.style.height = "auto"; t.style.height = `${Math.min(t.scrollHeight, 240)}px`; } };
-  const change = (e: React.ChangeEvent<HTMLTextAreaElement>) => { setText(e.target.value); setCaret(e.target.selectionStart); grow(); };
+  const change = (e: React.ChangeEvent<HTMLTextAreaElement>) => { setText(e.target.value); setCaret(e.target.selectionStart); grow(); if (e.target.value) onTyping?.(); };
   function pick(n: string) {
     const before = text.slice(0, caret).replace(/@([\w-]*)$/, `@${n} `);
     setText(before + text.slice(caret));

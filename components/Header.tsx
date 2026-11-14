@@ -25,7 +25,7 @@ export function GlobalActions() {
 export default function Header({ title, children }: { title: string; children?: React.ReactNode }) {
   const { back } = useNav();
   return (
-    <header className="z-10 shrink-0 border-b border-line bg-bg">
+    <header className="hdr glass absolute inset-x-0 top-0 z-20 border-b border-black/[.06] pt-[env(safe-area-inset-top)]">
       <div className="relative flex h-12 items-center px-1.5">
         <button onClick={back} aria-label="Retour" className="tap inline-flex h-11 items-center gap-0.5 rounded-[10px] pl-1 pr-2 text-[16px]"><Icon name="back" size={24} /></button>
         <h1 className="pointer-events-none absolute inset-x-16 truncate text-center text-[16.5px] font-semibold tracking-[-0.02em]">{title}</h1>

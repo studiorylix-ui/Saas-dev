@@ -5,6 +5,7 @@ import Avatar from "../Avatar";
 import Composer from "../Composer";
 import FieldInput from "../FieldInput";
 import Header from "../Header";
+import { ask } from "../Overlays";
 import { PushLink, useNav } from "../nav";
 import Icon from "../Icon";
 import Markdown from "../Markdown";
@@ -40,8 +41,8 @@ export default function TaskScreen({ id }: { id: string }) {
     db.insert("tasks", { title: sub.trim(), status_id: s.id, parent_id: id, project_id: t!.project_id, priority: 0, labels: [], fields: {}, description: "", assignee: null, due: null, deal_id: null });
     setSub("");
   }
-  function del() {
-    if (!confirm("Supprimer cette tâche et ses sous-tâches ?")) return;
+  async function del() {
+    if (!(await ask({ title: "Supprimer cette tâche et ses sous-tâches ?", confirm: "Supprimer la tâche", danger: true }))) return;
     db.remove("tasks", id);
     back();
   }

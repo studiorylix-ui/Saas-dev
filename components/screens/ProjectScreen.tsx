@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import ActivityFeed from "../ActivityFeed";
 import Header from "../Header";
+import { ask } from "../Overlays";
 import { useNav } from "../nav";
 import Icon from "../Icon";
 import LinkedPosts from "../LinkedPosts";
@@ -47,7 +48,7 @@ export default function ProjectScreen({ id }: { id: string }) {
 
   return (
     <div className="flex h-full flex-col">
-      <Header title="Projet"><button className={iconBtn} aria-label="Supprimer" onClick={() => { if (confirm("Supprimer ce projet ? Ses tâches sont conservées sans projet.")) { db.remove("projects", id); back(); } }}><Icon name="trash" size={18} className="text-muted" /></button></Header>
+      <Header title="Projet"><button className={iconBtn} aria-label="Supprimer" onClick={async () => { if (await ask({ title: "Supprimer ce projet ?", message: "Ses tâches sont conservées, sans projet.", confirm: "Supprimer le projet", danger: true })) { db.remove("projects", id); back(); } }}><Icon name="trash" size={18} className="text-muted" /></button></Header>
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 pb-8 pt-4">
         <input key={p.name} className="w-full bg-transparent text-[22px] font-semibold leading-tight tracking-[-0.025em] outline-none" defaultValue={p.name} onBlur={(e) => e.target.value.trim() && e.target.value !== p.name && upd({ name: e.target.value.trim() })} />
         <div>

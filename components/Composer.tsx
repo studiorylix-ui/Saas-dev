@@ -33,10 +33,10 @@ export function Thumbs({ imgs, remove }: { imgs: string[]; remove: (u: string) =
 }
 
 // Barre de saisie compacte (chat, réponses, commentaires). Cmd/Ctrl+Entrée envoie.
-export default function Composer({ placeholder, onSend, images = false, flat = false, className = "" }: { placeholder: string; onSend: OnSend; images?: boolean; flat?: boolean; className?: string }) {
-  const { ta, ...c } = useComposer(onSend);
+export default function Composer({ placeholder, onSend, images = false, flat = false, className = "", onTyping }: { placeholder: string; onSend: OnSend; images?: boolean; flat?: boolean; className?: string; onTyping?: () => void }) {
+  const { ta, ...c } = useComposer(onSend, onTyping);
   return (
-    <div className={`shrink-0 ${flat ? "" : "border-t border-line bg-surface"} px-3 py-2 ${className}`}>
+    <div className={`shrink-0 ${flat ? "" : "glass border-t border-black/[.06]"} px-3 py-2 ${className}`}>
       <Suggestions list={c.sugg} pick={c.pick} />
       <Thumbs imgs={c.imgs} remove={(u) => c.setImgs(c.imgs.filter((x) => x !== u))} />
       <div className="flex items-end gap-1.5">
@@ -48,8 +48,8 @@ export default function Composer({ placeholder, onSend, images = false, flat = f
         )}
         <textarea ref={ta} rows={1} className={`${area} max-h-40 min-h-11 resize-none`} placeholder={placeholder} value={c.text} onChange={c.change}
           onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) c.send(); }} />
-        <button aria-label="Envoyer" onClick={c.send} disabled={!c.can}
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-white transition-opacity duration-150 ease-out active:opacity-80 disabled:opacity-20">
+        <button aria-label="Envoyer" onPointerDown={(e) => e.preventDefault()} onClick={c.send} disabled={!c.can}
+          className="tap inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-white disabled:opacity-20">
           {c.busy ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" /> : <Icon name="send" size={19} stroke={2.2} />}
         </button>
       </div>

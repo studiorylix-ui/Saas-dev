@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startSync } from "@/lib/store";
 import { sb } from "@/lib/supabase/client";
 import { NavCtx, type Screen, decStack, urlFor } from "./nav";
+import Overlays from "./Overlays";
 import PushBanner from "./PushBanner";
 import RefsProvider from "./Refs";
 import Stack, { skipNextAnimation } from "./Stack";
@@ -70,6 +71,9 @@ export default function Shell() {
     });
   }, [router]);
 
+  // iOS n'applique :active (retour visuel au toucher) que si la page écoute touchstart.
+  useEffect(() => { const f = () => {}; document.addEventListener("touchstart", f, { passive: true }); return () => document.removeEventListener("touchstart", f); }, []);
+
   // Hauteur réelle visible (clavier iOS) → variables CSS utilisées par la coquille et les écrans.
   useEffect(() => {
     const vv = window.visualViewport;
@@ -127,6 +131,7 @@ export default function Shell() {
         </div>
         <TabBar hidden={stack.length > 0} />
         {authed && <Stack stack={stack} render={render} under={tabsEl} swipe={swipe} />}
+        <Overlays />
         <Toasts />
       </RefsProvider>
     </NavCtx.Provider>

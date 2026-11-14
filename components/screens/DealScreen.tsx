@@ -2,6 +2,7 @@
 import { useState } from "react";
 import ActivityFeed from "../ActivityFeed";
 import Header from "../Header";
+import { ask } from "../Overlays";
 import { useNav } from "../nav";
 import Icon from "../Icon";
 import LinkedPosts from "../LinkedPosts";
@@ -33,7 +34,7 @@ export default function DealScreen({ id }: { id: string }) {
 
   return (
     <div className="flex h-full flex-col">
-      <Header title="Affaire"><button className={iconBtn} aria-label="Supprimer" onClick={() => { if (confirm("Supprimer cette affaire ?")) { db.remove("deals", id); back(); } }}><Icon name="trash" size={18} className="text-muted" /></button></Header>
+      <Header title="Affaire"><button className={iconBtn} aria-label="Supprimer" onClick={async () => { if (await ask({ title: "Supprimer cette affaire ?", confirm: "Supprimer l'affaire", danger: true })) { db.remove("deals", id); back(); } }}><Icon name="trash" size={18} className="text-muted" /></button></Header>
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 pb-8 pt-4">
         <input key={d.name} className="w-full bg-transparent text-[22px] font-semibold leading-tight tracking-[-0.025em] outline-none" defaultValue={d.name} onBlur={(e) => e.target.value.trim() && e.target.value !== d.name && upd({ name: e.target.value.trim() })} />
         <section className="grid grid-cols-2 gap-x-3 gap-y-3 text-[13px]">
