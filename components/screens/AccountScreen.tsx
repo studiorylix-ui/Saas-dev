@@ -3,10 +3,11 @@ import { useState } from "react";
 import { sb } from "@/lib/supabase/client";
 import { type Theme, getTheme, setTheme } from "@/lib/theme";
 import { toast } from "@/lib/toast";
-import { btn, input, seg, segItem } from "@/lib/ui";
+import { btn, input } from "@/lib/ui";
 import Avatar from "../Avatar";
 import Header from "../Header";
 import Icon from "../Icon";
+import Segmented from "../Segmented";
 import { ask } from "../Overlays";
 import { useRefs } from "../Refs";
 
@@ -62,7 +63,7 @@ export default function AccountScreen() {
         <section className="space-y-2">
           <h2 className="px-1 text-[13px] font-medium text-muted">Apparence</h2>
           <div className="group-card p-3">
-            <div className={seg}>{THEMES.map(([k, l]) => <button key={k} onClick={() => pick(k)} className={segItem(theme === k)}>{l}</button>)}</div>
+            <Segmented options={THEMES} value={theme} onChange={pick} />
             <p className="mt-2 px-1 text-[12.5px] text-muted">« Auto » suit le réglage clair/sombre de l&apos;iPhone.</p>
           </div>
         </section>

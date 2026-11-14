@@ -35,7 +35,7 @@ export default function TaskRow({ t, subs }: { t: Task; subs?: Task[] }) {
   const done = statuses.find((x) => x.id === t.status_id)?.kind === "done";
   const sd = subs?.filter((x) => statuses.find((s) => s.id === x.status_id)?.kind === "done").length;
   return (
-    <div className="rise flex items-start gap-3 bg-surface px-4 py-3 active:bg-subtle">
+    <div className="rise flex items-start gap-3 bg-surface px-4 py-3 row">
       <div className="pt-[1px]"><StatusDot t={t} /></div>
       <PushLink to={{ k: "task", id: t.id }} className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

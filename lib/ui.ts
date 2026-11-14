@@ -1,8 +1,8 @@
 // Système visuel : fond #FAFAFA, surfaces blanches, bordures 1px #EDEDED, accent noir, coins ≤ 12px.
 const ease = "transition-colors duration-150 ease-out";
-export const input = `w-full h-11 rounded-[12px] bg-surface px-3.5 text-[16px] text-ink placeholder:text-muted/70 outline-none shadow-card ${ease} focus:ring-4 focus:ring-ink/[.06]`;
-export const area = `w-full rounded-[20px] bg-surface px-4 py-2.5 text-[16px] leading-snug text-ink placeholder:text-muted/70 outline-none shadow-card ${ease} focus:ring-4 focus:ring-ink/[.06]`;
-export const sel = `h-9 rounded-[10px] bg-surface px-2.5 text-[14px] text-ink outline-none shadow-card ${ease}`;
+export const input = "field w-full h-11 px-3.5 text-[16px] text-ink";
+export const area = "field w-full !rounded-[20px] px-4 py-2.5 text-[16px] leading-snug text-ink";
+export const sel = "field h-9 !rounded-[11px] px-2.5 text-[14px] text-ink";
 export const plain = `h-9 max-w-[58vw] truncate rounded-[10px] bg-transparent px-2 text-right text-[15px] text-ink outline-none [text-align-last:right] ${ease} active:bg-fill`;
 export const btn = `tap btn-light inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-[12px] px-4 text-[15px] font-semibold text-on-accent disabled:opacity-30`;
 export const ghost = `tap inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-[10px] px-2.5 text-[14px] text-muted ${ease} active:bg-fill`;

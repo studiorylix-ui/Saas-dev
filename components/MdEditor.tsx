@@ -16,7 +16,7 @@ export default function MdEditor({ value, onSave, placeholder }: { value: string
     );
   }
   return (
-    <div onClick={() => { setV(value); setEdit(true); }} className="min-h-11 cursor-text rounded-[14px] bg-fill px-3 py-2.5 transition-colors duration-150 active:bg-subtle">
+    <div onClick={() => { setV(value); setEdit(true); }} className="field min-h-11 cursor-text px-3 py-2.5 transition-colors duration-150 row">
       {value ? <Markdown text={value} /> : <span className="text-[15px] text-muted/70">{placeholder}</span>}
     </div>
   );

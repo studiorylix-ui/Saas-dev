@@ -18,7 +18,7 @@ export default function NotesTab() {
       {!ready ? <Skeleton avatar={false} /> : (
         <div className="group-card mx-4 divide-y divide-line">
           {rows.map((n) => (
-            <PushLink key={n.id} to={{ k: "note", id: n.id }} className="rise block bg-surface px-4 py-3 active:bg-subtle">
+            <PushLink key={n.id} to={{ k: "note", id: n.id }} className="rise block bg-surface px-4 py-3 row">
               <div className="flex items-baseline gap-3"><span className="min-w-0 flex-1 truncate text-[15px] font-medium">{n.title || "Sans titre"}</span><span className="shrink-0 text-[12px] text-muted">{ago(n.updated_at)}</span></div>
               {n.body && <div className="mt-0.5 line-clamp-2 text-[13.5px] leading-snug text-muted">{n.body}</div>}
             </PushLink>

@@ -131,7 +131,7 @@ export default function ChatTab() {
     const n = unread[x.id] ?? 0;
     return (
       <button key={x.id} onClick={() => { setPicked(x.id); setThread(null); }}
-        className={`tap relative inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border pr-3.5 text-[14px] ${x.kind === "dm" ? "pl-1" : "pl-3"} ${on ? "border-ink bg-ink text-on-accent" : "border-line bg-surface/70 text-ink"}`}>
+        className={`tap relative inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full pr-3.5 text-[14px] ${x.kind === "dm" ? "pl-1" : "pl-3"} ${on ? "bg-accent text-on-accent shadow-card" : "bg-surface text-ink shadow-card"}`}>
         {x.kind === "dm" ? <Avatar name={label(x)} size={26} /> : <span className={on ? "text-on-accent/50" : "text-muted"}>#</span>}
         <span className={n && !on ? "font-semibold" : ""}>{label(x)}</span>
         {n > 0 && !on && <span className="pop ml-0.5 inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-ink px-1 text-[10.5px] font-semibold text-on-accent">{n > 99 ? "99+" : n}</span>}
@@ -143,7 +143,7 @@ export default function ChatTab() {
     <div className="border-b border-line">
       {thread ? (
         <div className="flex items-center gap-2 px-4 pb-2.5">
-          <button onClick={() => setThread(null)} className="tap inline-flex h-9 items-center gap-1 rounded-full bg-surface shadow-card/70 pl-2 pr-3.5 text-[14px]"><Icon name="back" size={18} />{cur?.kind === "dm" ? label(cur) : `#${cur?.name}`}</button>
+          <button onClick={() => setThread(null)} className="tap inline-flex h-9 items-center gap-1 rounded-full bg-surface pl-2 pr-3.5 shadow-card text-[14px]"><Icon name="back" size={18} />{cur?.kind === "dm" ? label(cur) : `#${cur?.name}`}</button>
           <span className="text-[13px] text-muted">Fil · {replies(thread).length} réponse{replies(thread).length > 1 ? "s" : ""}</span>
         </div>
       ) : (

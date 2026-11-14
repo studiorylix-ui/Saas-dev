@@ -47,7 +47,7 @@ export default function SearchScreen() {
         <div className="relative">
           <Icon name="search" size={17} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
           <input autoFocus type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Rechercher dans tout le hub"
-            className="h-11 w-full rounded-[12px] bg-fill pl-10 pr-3 text-[16px] outline-none placeholder:text-muted/70" />
+            className="field h-11 w-full pl-10 pr-3 text-[16px]" />
         </div>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto pb-8">
@@ -56,7 +56,7 @@ export default function SearchScreen() {
             <h2 className="px-4 pb-1.5 text-[12px] font-medium uppercase tracking-[.06em] text-muted">{title}</h2>
             <div className="group-card mx-4 divide-y divide-line">
               {hits.slice(0, 8).map((h) => (
-                <button key={h.id} onClick={h.go} className="flex w-full items-center gap-3 px-4 py-2.5 text-left active:bg-subtle">
+                <button key={h.id} onClick={h.go} className="flex w-full items-center gap-3 px-4 py-2.5 text-left row">
                   {h.avatar ? <Avatar name={h.avatar} size={34} /> : <span className="inline-flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-full bg-subtle text-muted"><Icon name={h.icon!} size={17} /></span>}
                   <div className="min-w-0 flex-1"><div className="truncate text-[15px] font-medium">{h.title}</div><div className="truncate text-[13px] text-muted">{h.sub}</div></div>
                 </button>

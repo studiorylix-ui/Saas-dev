@@ -2,10 +2,11 @@
 import { useState } from "react";
 import { db, useReady, useTable } from "@/lib/store";
 import { firstTodo } from "@/lib/tasks";
-import { btn, input, seg, segItem, sel } from "@/lib/ui";
+import { btn, input, sel } from "@/lib/ui";
 import type { Project, Task } from "@/lib/types";
 import { RoundPush, roundBtn } from "../Header";
 import Icon from "../Icon";
+import Segmented from "../Segmented";
 import { useRefs } from "../Refs";
 import TabScaffold, { Skeleton } from "../TabScaffold";
 import TaskRow from "../TaskRow";
@@ -54,7 +55,7 @@ export default function TasksTab() {
             <button className={`${btn} px-3.5`} onClick={add} disabled={!title.trim()}>Ajouter</button>
           </div>
         )}
-        <div className={seg}>{VIEWS.map(([k, l]) => <button key={k} onClick={() => setView(k)} className={segItem(view === k)}>{l}</button>)}</div>
+        <Segmented options={VIEWS} value={view} onChange={setView} />
         <div className="flex gap-2">
           <div className="relative min-w-0 flex-1">
             <Icon name="search" size={15} className="pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-muted" />

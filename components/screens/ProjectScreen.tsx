@@ -61,14 +61,14 @@ export default function ProjectScreen({ id }: { id: string }) {
           <label className="space-y-1"><span className="text-muted">Début</span><input type="date" className={`${sel} w-full`} value={p.start_date ?? ""} onChange={(e) => upd({ start_date: e.target.value || null })} /></label>
           <label className="space-y-1"><span className="text-muted">Échéance</span><input type="date" className={`${sel} w-full`} value={p.due_date ?? ""} onChange={(e) => upd({ due_date: e.target.value || null })} /></label>
         </section>
-        {chan && <a href={`/chat?c=${chan.id}`} onClick={(e) => { e.preventDefault(); openChat(chan.id); }} className="flex h-11 items-center gap-2.5 group-card px-3.5 text-[14px] active:bg-subtle"><Icon name="chat" size={17} className="text-muted" /><span className="flex-1">#{chan.name}</span><Icon name="chevron" size={16} className="text-muted" /></a>}
+        {chan && <a href={`/chat?c=${chan.id}`} onClick={(e) => { e.preventDefault(); openChat(chan.id); }} className="flex h-11 items-center gap-2.5 group-card px-3.5 text-[14px] row"><Icon name="chat" size={17} className="text-muted" /><span className="flex-1">#{chan.name}</span><Icon name="chevron" size={16} className="text-muted" /></a>}
         <section className="space-y-1"><h2 className={section}>Description</h2><MdEditor value={p.description} onSave={(v) => upd({ description: v })} placeholder="Objectif, périmètre, liens, stack…" /></section>
 
         <section className="space-y-2">
           <h2 className={section}>Jalons {mil.length > 0 && `· ${mil.filter((m) => m.done).length}/${mil.length}`}</h2>
           {mil.map((m) => (
             <div key={m.id} className="flex items-center gap-3 text-sm">
-              <input type="checkbox" className="h-5 w-5" checked={m.done} onChange={(e) => db.update("milestones", m.id, { done: e.target.checked })} />
+              <input type="checkbox" className="h-5 w-5 accent-ink" checked={m.done} onChange={(e) => db.update("milestones", m.id, { done: e.target.checked })} />
               <span className={`flex-1 ${m.done ? "line-through opacity-50" : ""}`}>{m.title}</span>
               <input type="date" className={sel} value={m.due ?? ""} onChange={(e) => db.update("milestones", m.id, { due: e.target.value || null })} />
               <button aria-label="Supprimer le jalon" className="inline-flex h-9 w-9 items-center justify-center text-muted" onClick={() => db.remove("milestones", m.id)}><Icon name="x" size={15} /></button>

@@ -18,7 +18,7 @@ export default function ActivityScreen() {
       <div className="min-h-0 flex-1 overflow-y-auto pb-8">
         <div className={feed.length ? "group-card mx-4 mt-2 divide-y divide-line" : ""}>
           {feed.map((f) => (
-            <PushLink key={f.id} to={f.to} className="rise flex gap-3 px-4 py-3 active:bg-subtle">
+            <PushLink key={f.id} to={f.to} className="rise flex gap-3 px-4 py-3 row">
               <div className="relative">
                 <Avatar name={name(f.actor)} size={38} />
                 <span className="absolute -bottom-0.5 -right-0.5 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full border-2 border-bg bg-ink text-on-accent"><Icon name={f.icon} size={10} stroke={2.6} filled={f.icon === "heart"} /></span>

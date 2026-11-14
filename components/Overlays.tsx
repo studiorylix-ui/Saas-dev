@@ -112,7 +112,7 @@ function AskHost({ a }: { a: Ask | null }) {
           <div className="px-5 pb-3 pt-4"><div className="text-[13px] font-semibold text-muted">{q.title}</div>{q.message && <div className="mt-1 text-[13px] text-muted">{q.message}</div>}</div>
           <button onClick={() => done(true)} className={`h-14 w-full border-t border-line text-[18px] active:bg-fill ${q.danger ? "text-danger" : "text-ink"}`}>{q.confirm}</button>
         </div>
-        <button onClick={() => done(false)} className="h-14 w-full rounded-[20px] bg-surface text-[18px] font-semibold active:bg-subtle">Annuler</button>
+        <button onClick={() => done(false)} className="h-14 w-full rounded-[20px] bg-surface text-[18px] font-semibold row">Annuler</button>
       </div>
     </div>
   );

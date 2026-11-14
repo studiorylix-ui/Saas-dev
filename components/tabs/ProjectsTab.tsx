@@ -3,11 +3,12 @@ import { useState } from "react";
 import Avatar from "../Avatar";
 import { roundBtn } from "../Header";
 import Icon from "../Icon";
+import Segmented from "../Segmented";
 import { PushLink } from "../nav";
 import { useRefs } from "../Refs";
 import TabScaffold, { Skeleton } from "../TabScaffold";
 import { db, useReady, useTable } from "@/lib/store";
-import { STAGES, STAGE_PROB, btn, day, eur, input, overdue, seg, segItem } from "@/lib/ui";
+import { STAGES, STAGE_PROB, btn, day, eur, input, overdue } from "@/lib/ui";
 import type { Deal, Project, Task } from "@/lib/types";
 
 const STATUS_DOT: Record<string, string> = { idée: "#b5b5b5", "en cours": "#d08a1c", "en pause": "#8a8a8a", terminé: "#1f9d55" };
@@ -45,7 +46,7 @@ export default function ProjectsTab() {
             <button className={`${btn} px-3.5`} onClick={add} disabled={!title.trim()}>Ajouter</button>
           </div>
         )}
-        <div className={seg}>{(["projects", "deals"] as const).map((t) => <button key={t} onClick={() => setTab(t)} className={segItem(tab === t)}>{t === "projects" ? "Projets" : "Affaires"}</button>)}</div>
+        <Segmented options={[["projects", "Projets"], ["deals", "Affaires"]] as const} value={tab} onChange={setTab} />
       </div>}>
       {!ready ? <Skeleton avatar={false} /> : <div>
         {tab === "projects" ? (!projects.length ? <p className="py-20 text-center text-[13px] text-muted">Aucun projet. Chaque projet crée aussi son canal de discussion.</p> :
@@ -55,7 +56,7 @@ export default function ProjectsTab() {
               const done = t.filter(isDone).length;
               const pct = t.length ? Math.round((done / t.length) * 100) : 0;
               return (
-                <PushLink key={p.id} to={{ k: "project", id: p.id }} className="rise block bg-surface px-4 py-3.5 active:bg-subtle">
+                <PushLink key={p.id} to={{ k: "project", id: p.id }} className="rise block bg-surface px-4 py-3.5 row">
                   <div className="flex items-center gap-2">
                     <span className="min-w-0 flex-1 truncate text-[15px] font-medium">{p.name}</span>
                     {p.lead && <Avatar name={name(p.lead)} size={22} />}

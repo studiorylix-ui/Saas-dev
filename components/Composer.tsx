@@ -9,7 +9,7 @@ export function Suggestions({ list, pick }: { list: { id: string; name: string }
   return (
     <div className="mb-2 group-card bg-surface">
       {list.map((p) => (
-        <button key={p.id} onClick={() => pick(p.name)} className="flex h-11 w-full items-center gap-2.5 px-3 text-left text-[14px] active:bg-subtle">
+        <button key={p.id} onClick={() => pick(p.name)} className="flex h-11 w-full items-center gap-2.5 px-3 text-left text-[14px] row">
           <Avatar name={p.name} size={24} /><span className="font-medium">{p.name}</span>
         </button>
       ))}
