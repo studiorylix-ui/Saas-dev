@@ -10,7 +10,7 @@ export function useTable<T>(table: string, order = "created_at", asc = false) {
   useEffect(() => {
     const load = () => void sb().from(table).select("*").order(order, { ascending: asc }).then(({ data }) => setRows((data ?? []) as T[]));
     load();
-    const ch = sb().channel(`rt-${table}-${order}`).on("postgres_changes", { event: "*", schema: "public", table }, load).subscribe();
+    const ch = sb().channel(`rt-${table}-${Math.random().toString(36).slice(2)}`).on("postgres_changes", { event: "*", schema: "public", table }, load).subscribe();
     return () => { sb().removeChannel(ch); };
   }, [table, order, asc, tick]);
   return { rows, reload: () => setTick((t) => t + 1) };

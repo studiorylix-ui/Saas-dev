@@ -1,3 +1,7 @@
 "use client";
-import Messages from "@/components/Messages";
-export default function Page() { return <Messages kind="chat" />; }
+import { Suspense } from "react";
+import Chat from "@/components/Chat";
+
+export default function Page() {
+  return <Suspense><Chat /></Suspense>;
+}
