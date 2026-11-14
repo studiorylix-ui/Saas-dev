@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Avatar from "@/components/Avatar";
-import Header from "@/components/Header";
+import Header, { roundBtn } from "@/components/Header";
 import Icon from "@/components/Icon";
 import { useRefs } from "@/components/Refs";
 import { sb } from "@/lib/supabase/client";
@@ -19,6 +19,7 @@ export default function Projects() {
   const { rows: deals } = useTable<Deal>("deals");
   const [tab, setTab] = useState<"projects" | "deals">("projects");
   const [title, setTitle] = useState("");
+  const [adding, setAdding] = useState(false);
   const isDone = (t: Task) => statuses.find((s) => s.id === t.status_id)?.kind === "done";
 
   async function add() {
@@ -35,12 +36,19 @@ export default function Projects() {
 
   return (
     <div className="flex h-full flex-col">
-      <Header title={tab === "projects" ? "Projets" : "Affaires"} />
-      <div className="shrink-0 border-b border-line px-4 py-2.5">
+      <Header large title={tab === "projects" ? "Projets" : "Affaires"}><button aria-label="Ajouter" onClick={() => setAdding(!adding)} className={`${roundBtn} ${adding ? "" : "!bg-accent !text-white"}`}><Icon name={adding ? "x" : "plus"} size={19} stroke={2.2} /></button></Header>
+      {adding && (
+        <div className="flex shrink-0 gap-2 px-4 pb-2.5">
+          <input autoFocus className={input} placeholder={tab === "projects" ? "Nouveau projet (crée aussi son canal)" : "Nouvelle affaire"} value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") add(); if (e.key === "Escape") setAdding(false); }} />
+          <button className={`${btn} px-3.5`} onClick={add} disabled={!title.trim()}>Ajouter</button>
+        </div>
+      )}
+
+      <div className="shrink-0 border-b border-line px-4 pb-2.5">
         <div className={seg}>{(["projects", "deals"] as const).map((t) => <button key={t} onClick={() => setTab(t)} className={segItem(tab === t)}>{t === "projects" ? "Projets" : "Affaires"}</button>)}</div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="tabpad min-h-0 flex-1 overflow-y-auto">
         {tab === "projects" ? (!projects.length ? <p className="py-20 text-center text-[13px] text-muted">Aucun projet. Chaque projet crée aussi son canal de discussion.</p> :
           <div className="divide-y divide-line border-b border-line">
             {projects.map((p) => {
@@ -96,10 +104,6 @@ export default function Projects() {
         )}
       </div>
 
-      <div className="flex shrink-0 gap-2 border-t border-line bg-surface px-3 py-2">
-        <input className={input} placeholder={tab === "projects" ? "Nouveau projet" : "Nouvelle affaire"} value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
-        <button className={`${btn} w-11 !px-0`} aria-label="Ajouter" onClick={add} disabled={!title.trim()}><Icon name="plus" size={20} stroke={2.2} /></button>
-      </div>
     </div>
   );
 }

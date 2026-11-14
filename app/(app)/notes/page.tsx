@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import Header from "@/components/Header";
+import Header, { roundBtn } from "@/components/Header";
 import Icon from "@/components/Icon";
 import { sb } from "@/lib/supabase/client";
 import { useTable } from "@/lib/useTable";
@@ -42,9 +42,9 @@ export default function Notes() {
   }
   return (
     <div className="flex h-full flex-col">
-      <Header title="Notes"><button className={iconBtn} aria-label="Nouvelle note" onClick={add}><Icon name="plus" size={22} /></button></Header>
-      <div className="min-h-0 flex-1 overflow-y-auto">
-        <div className="divide-y divide-line border-b border-line">
+      <Header large title="Notes"><button aria-label="Nouvelle note" onClick={add} className={`${roundBtn} !bg-accent !text-white`}><Icon name="plus" size={19} stroke={2.2} /></button></Header>
+      <div className="tabpad min-h-0 flex-1 overflow-y-auto">
+        <div className="divide-y divide-line border-y border-line">
           {rows.map((n) => (
             <button key={n.id} onClick={() => setOpenId(n.id)} className="block w-full bg-surface px-4 py-3 text-left transition-colors duration-150 active:bg-subtle">
               <div className="flex items-baseline gap-3"><span className="min-w-0 flex-1 truncate text-[15px] font-medium">{n.title || "Sans titre"}</span><span className="shrink-0 text-[12px] text-muted">{ago(n.updated_at)}</span></div>

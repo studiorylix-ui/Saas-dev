@@ -1,14 +1,14 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import Header from "@/components/Header";
+import Header, { roundBtn } from "@/components/Header";
 import Icon from "@/components/Icon";
 import { useRefs } from "@/components/Refs";
 import TaskRow from "@/components/TaskRow";
 import { sb } from "@/lib/supabase/client";
 import { firstTodo } from "@/lib/tasks";
 import { useTable } from "@/lib/useTable";
-import { btn, iconBtn, input, seg, segItem, sel } from "@/lib/ui";
+import { btn, input, seg, segItem, sel } from "@/lib/ui";
 import type { Project, Task } from "@/lib/types";
 
 const VIEWS = [["list", "Liste"], ["board", "Tableau"], ["project", "Projets"]] as const;
@@ -22,6 +22,7 @@ export default function Tasks() {
   const [q, setQ] = useState("");
   const [label, setLabel] = useState("");
   const [title, setTitle] = useState("");
+  const [adding, setAdding] = useState(false);
 
   const top = rows.filter((t) => !t.parent_id && (!mine || t.assignee === me) && (!label || t.labels.includes(label)) && t.title.toLowerCase().includes(q.toLowerCase()));
   const subs = (id: string) => rows.filter((t) => t.parent_id === id);
@@ -42,8 +43,15 @@ export default function Tasks() {
 
   return (
     <div className="flex h-full flex-col">
-      <Header title="Tâches"><Link href="/tasks/settings" className={iconBtn} aria-label="Personnaliser"><Icon name="sliders" size={19} /></Link></Header>
-      <div className="shrink-0 space-y-2 border-b border-line px-4 py-2.5">
+      <Header large title="Tâches"><Link href="/tasks/settings" className={roundBtn} aria-label="Personnaliser"><Icon name="sliders" size={17} /></Link><button aria-label="Ajouter" onClick={() => setAdding(!adding)} className={`${roundBtn} ${adding ? "" : "!bg-accent !text-white"}`}><Icon name={adding ? "x" : "plus"} size={19} stroke={2.2} /></button></Header>
+      {adding && (
+        <div className="flex shrink-0 gap-2 px-4 pb-2.5">
+          <input autoFocus className={input} placeholder={"Nouvelle tâche"} value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") add(); if (e.key === "Escape") setAdding(false); }} />
+          <button className={`${btn} px-3.5`} onClick={add} disabled={!title.trim()}>Ajouter</button>
+        </div>
+      )}
+
+      <div className="shrink-0 space-y-2 border-b border-line px-4 pb-2.5">
         <div className={seg}>{VIEWS.map(([k, l]) => <button key={k} onClick={() => setView(k)} className={segItem(view === k)}>{l}</button>)}</div>
         <div className="flex gap-2">
           <div className="relative min-w-0 flex-1">
@@ -55,7 +63,7 @@ export default function Tasks() {
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto pb-4">
+      <div className="tabpad min-h-0 flex-1 overflow-y-auto">
         {view === "list" && <div className="space-y-3 pt-2">{statuses.map((s) => group(s.id, <>{dot(s.color)}{s.name}</>, top.filter((t) => t.status_id === s.id)))}</div>}
         {view === "project" && (
           <div className="space-y-3 pt-2">
@@ -88,13 +96,9 @@ export default function Tasks() {
             })}
           </div>
         )}
-        {!top.length && view !== "board" && <p className="py-20 text-center text-[13px] text-muted">{rows.length ? "Aucune tâche pour ce filtre." : "Aucune tâche. Ajoutez la première ci-dessous."}</p>}
+        {!top.length && view !== "board" && <p className="py-20 text-center text-[13px] text-muted">{rows.length ? "Aucune tâche pour ce filtre." : "Aucune tâche. Touchez + pour en ajouter une."}</p>}
       </div>
 
-      <div className="flex shrink-0 gap-2 border-t border-line bg-surface px-3 py-2">
-        <input className={input} placeholder="Nouvelle tâche" value={title} onChange={(e) => setTitle(e.target.value)} onKeyDown={(e) => e.key === "Enter" && add()} />
-        <button className={`${btn} w-11 !px-0`} aria-label="Ajouter" onClick={add} disabled={!title.trim()}><Icon name="plus" size={20} stroke={2.2} /></button>
-      </div>
     </div>
   );
 }

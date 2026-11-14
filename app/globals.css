@@ -12,6 +12,11 @@
   --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
 }
 
+/* Barre d'onglets flottante : hauteur réservée en bas des pages racines. */
+:root { --tabbar: calc(62px + max(env(safe-area-inset-bottom), 10px) + 10px); }
+body[data-tabbar] .tabpad { padding-bottom: var(--tabbar); }
+body[data-tabbar] .above-tabbar { margin-bottom: var(--tabbar); }
+
 html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 body { font-feature-settings: "cv11", "ss01"; letter-spacing: -0.006em; overscroll-behavior: none; }
 ::selection { background: #0a0a0a; color: #fff; }

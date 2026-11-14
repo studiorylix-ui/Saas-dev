@@ -17,7 +17,11 @@ export async function POST(req: Request) {
   let only: string[] | null = null; // destinataires restreints (sinon tout le monde sauf l'auteur)
   let mention: Msg | null = null; // variante pour les personnes mentionnées
 
-  if (table === "messages") msg = { title: `#${(await one("channels", r.channel_id)) ?? "chat"} · ${who}`, body: cut(r.body), url: `/chat?c=${r.channel_id}` };
+  if (table === "messages") {
+    const { data: ch } = await db.from("channels").select("name, kind, members").eq("id", r.channel_id).single();
+    msg = { title: ch?.kind === "dm" ? who : `#${ch?.name ?? "chat"} · ${who}`, body: cut(r.body), url: `/chat?c=${r.channel_id}` };
+    if (ch?.kind === "dm") only = ch.members; // message privé : seulement l'autre membre
+  }
   else if (table === "posts") {
     msg = { title: r.parent_id ? `${who} a répondu` : `${who} · nouveau post`, body: cut(r.body || "📷 photo"), url: `/posts/${r.parent_id ?? r.id}` };
     mention = { ...msg, title: `${who} vous a mentionné` };
