@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 !.env.example
 *.local.sql
+ACCES-EQUIPE.local.txt
