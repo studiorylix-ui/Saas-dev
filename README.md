@@ -3,7 +3,7 @@
 Espace d'équipe pour iPhone : discussion (fil + réponses), posts, tâches & affaires, projets (avancement auto), notes. Next.js + Supabase, déployé sur Vercel.
 
 ## Mise en route
-1. Créer un projet sur supabase.com, exécuter `supabase/schema.sql` (SQL Editor).
+1. Créer un projet sur supabase.com, exécuter dans l'ordre `supabase/schema.sql` puis `supabase/migration-2.sql` (remplacer `__SECRET__` par le secret du webhook) dans le SQL Editor.
 2. Auth > Providers > Email : désactiver « Allow new users to sign up ».
 3. Auth > Users > Add user > Create new user (email + mot de passe, « Auto Confirm User » coché), un par membre.
 4. Vercel : importer ce dépôt, variables `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` (voir `.env.example`).
